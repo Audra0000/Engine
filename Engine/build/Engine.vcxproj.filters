@@ -1,16 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\anaam7\Desktop\Engine\Engine\Main.cpp">
+    <ClCompile Include="C:\Users\aalca\Documents\GitHub\-engine\Engine\Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\aalca\Documents\GitHub\-engine\Engine\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\anaam7\Desktop\Engine\Engine\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\aalca\Documents\GitHub\-engine\Engine\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{8C06C259-1472-3D5D-A9B3-9D2F4019FE54}</UniqueIdentifier>
+      <UniqueIdentifier>{AEDDAC25-D8DC-3A2A-B360-D96D408E30EC}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

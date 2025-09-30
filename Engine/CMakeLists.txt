@@ -3,7 +3,9 @@ cmake_minimum_required(VERSION 3.10)
 project(Engine)
 
 find_package(fmt CONFIG REQUIRED)
+find_package(SDL3 CONFIG REQUIRED)
 
-add_executable(Engine Main.cpp)
+add_executable(Engine Main.cpp Application.cpp)
 
 target_link_libraries(Engine PRIVATE fmt::fmt)
+target_link_libraries(Engine PRIVATE SDL3::SDL3)
