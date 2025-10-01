@@ -1,39 +1,30 @@
 #pragma once
 
-#include <vector>
-
-enum update_status
-{
-	UPDATE_CONTINUE = 1,
-	UPDATE_STOP,
-	UPDATE_ERROR
-};
-
-class Module;
-class ModuleWindow;
+#include <memory>
+#include "Window.h"
 
 class Application
 {
 public:
+    // Singleton instance
+    static Application& GetInstance();
 
-	ModuleWindow* window;
-	
+    // Main application flow
+    bool Init();
+    bool Update();
+    bool CleanUp();
 
-private:
-
-	std::vector<Module*> list_modules;
-	
-
-public:
-
-	Application();
-	~Application();
-
-	bool Init();
-	update_status Update();
-	bool CleanUp();
+    // Modules
+    std::shared_ptr<Window> window;
 
 private:
+    // Private constructor for singleton
+    Application();
+    ~Application() = default;
 
-	void AddModule(Module* module);
+    // Delete copy constructor and assignment
+    Application(const Application&) = delete;
+    Application& operator=(const Application&) = delete;
+
+    bool isRunning;
 };

@@ -7,6 +7,9 @@
     <ClCompile Include="C:\Users\aalca\Documents\GitHub\-engine\Engine\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\aalca\Documents\GitHub\-engine\Engine\Window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Users\aalca\Documents\GitHub\-engine\Engine\CMakeLists.txt" />

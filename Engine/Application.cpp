@@ -1,105 +1,63 @@
 #include "Application.h"
+#include <iostream>
 
-//#include "Module.h"
-//#include "ModuleWindow.h"
-
-Application::Application()
+Application::Application() : isRunning(true)
 {
-	//window = new ModuleWindow(this);
-
-	// The order of calls is very important!
-	// Modules will Init() Start() and Update in this order
-	// They will CleanUp() in reverse order
-
-	// Main Modules
-	//AddModule(window);
-
+    std::cout << "Application Constructor" << std::endl;
+    window = std::make_shared<Window>();
 }
 
-Application::~Application()
+Application& Application::GetInstance()
 {
-	/*for (auto it = list_modules.rbegin(); it != list_modules.rend(); ++it)
-	{
-		Module* item = *it;
-		delete item;
-	}
-	list_modules.clear();*/
-
+    static Application instance;
+    return instance;
 }
 
 bool Application::Init()
 {
-	bool ret = true;
+    std::cout << "Application Init" << std::endl;
 
-	//// Call Init() in all modules
-	//for (auto it = list_modules.begin(); it != list_modules.end() && ret; ++it)
-	//{
-	//	Module* module = *it;
-	//	ret = module->Init();
-	//}
+    if (!window->Init())
+    {
+        std::cerr << "Failed to initialize Window!" << std::endl;
+        return false;
+    }
 
-	//// After all Init calls we call Start() in all modules
-	//LOG("Application Start --------------");
-
-	//for (auto it = list_modules.begin(); it != list_modules.end() && ret; ++it)
-	//{
-	//	Module* module = *it;
-	//	ret = module->Start();
-	//}
-
-	return ret;
+    return true;
 }
 
-// Call PreUpdate, Update and PostUpdate on all modules
-update_status Application::Update()
+bool Application::Update()
 {
-	update_status ret = UPDATE_CONTINUE;
+    // Update window (handles events)
+    if (!window->Update())
+    {
+        isRunning = false;
+    }
 
-	/*for (auto it = list_modules.begin(); it != list_modules.end() && ret == UPDATE_CONTINUE; ++it)
-	{
-		Module* module = *it;
-		if (module->IsEnabled())
-		{
-			ret = module->PreUpdate();
-		}
-	}
+    // Clear screen to black and present
+    window->Render();
 
-	for (auto it = list_modules.begin(); it != list_modules.end() && ret == UPDATE_CONTINUE; ++it)
-	{
-		Module* module = *it;
-		if (module->IsEnabled())
-		{
-			ret = module->Update();
-		}
-	}
-
-	for (auto it = list_modules.begin(); it != list_modules.end() && ret == UPDATE_CONTINUE; ++it)
-	{
-		Module* module = *it;
-		if (module->IsEnabled())
-		{
-			ret = module->PostUpdate();
-		}
-	}
-
-	if (WindowShouldClose()) ret = UPDATE_STOP;*/
-
-	return ret;
+    return isRunning;
 }
 
 bool Application::CleanUp()
 {
-	bool ret = true;
-	/*for (auto it = list_modules.rbegin(); it != list_modules.rend() && ret; ++it)
-	{
-		Module* item = *it;
-		ret = item->CleanUp();
-	}*/
+    std::cout << "Application CleanUp" << std::endl;
 
-	return ret;
+    if (window)
+    {
+        window->CleanUp();
+    }
+
+    return true;
 }
 
-void Application::AddModule(Module* mod)
-{
-	/*list_modules.emplace_back(mod);*/
-}
+
+
+// para cuando tengamos mas modulos
+//void Engine::AddModule(std::shared_ptr<Module> module) {
+//    module->Init();
+//    moduleList.push_back(module);
+//}
+// llamar en el constructor a esta funcion y añadir por ej.     AddModule(std::static_pointer_cast<Module>(window));
+// luego para todas las cosas donde tengamos que recorrer modulos (ej. update?) usamos esa lista
