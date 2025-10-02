@@ -3,13 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\build\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{3A8ED133-D7B5-39CA-9D62-519B206C183E}|Engine.vcxproj|C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Window.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{3A8ED133-D7B5-39CA-9D62-519B206C183E}|Engine.vcxproj|C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Input.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3A8ED133-D7B5-39CA-9D62-519B206C183E}|Engine.vcxproj|C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Window.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3A8ED133-D7B5-39CA-9D62-519B206C183E}|Engine.vcxproj|C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Module.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3A8ED133-D7B5-39CA-9D62-519B206C183E}|Engine.vcxproj|C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Application.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
@@ -18,10 +15,19 @@
       "AbsoluteMoniker": "D:0:0:{3A8ED133-D7B5-39CA-9D62-519B206C183E}|Engine.vcxproj|C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Application.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3A8ED133-D7B5-39CA-9D62-519B206C183E}|Engine.vcxproj|C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{3A8ED133-D7B5-39CA-9D62-519B206C183E}|Engine.vcxproj|C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Input.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3A8ED133-D7B5-39CA-9D62-519B206C183E}|Engine.vcxproj|C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\CMakeLists.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3A8ED133-D7B5-39CA-9D62-519B206C183E}|Engine.vcxproj|C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Module.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3A8ED133-D7B5-39CA-9D62-519B206C183E}|Engine.vcxproj|C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3A8ED133-D7B5-39CA-9D62-519B206C183E}|Engine.vcxproj|C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Window.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -31,24 +37,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Module.h",
-              "DocumentMoniker": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Module.h",
-              "RelativeDocumentMoniker": "..\\src\\Module.h",
-              "ToolTip": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Module.h",
-              "RelativeToolTip": "..\\src\\Module.h",
-              "ViewState": "AgIAABsAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "DocumentIndex": 4,
+              "Title": "Input.h",
+              "DocumentMoniker": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Input.h",
+              "RelativeDocumentMoniker": "..\\src\\Input.h",
+              "ToolTip": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Input.h",
+              "RelativeToolTip": "..\\src\\Input.h",
+              "ViewState": "AgIAACcAAAAAAAAAAAAAADAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-10-02T15:58:36.501Z",
+              "WhenOpened": "2025-10-02T16:41:07.3Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 8,
               "Title": "Window.h",
               "DocumentMoniker": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Window.h",
               "RelativeDocumentMoniker": "..\\src\\Window.h",
@@ -61,13 +67,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 3,
               "Title": "Application.h",
               "DocumentMoniker": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Application.h",
               "RelativeDocumentMoniker": "..\\src\\Application.h",
               "ToolTip": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Application.h",
               "RelativeToolTip": "..\\src\\Application.h",
-              "ViewState": "AgIAABIAAAAAAAAAAAAAAEEAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAACoAAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-10-02T06:30:23.129Z",
               "EditorCaption": ""
@@ -80,7 +86,7 @@
               "RelativeDocumentMoniker": "..\\src\\Window.cpp",
               "ToolTip": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Window.cpp",
               "RelativeToolTip": "..\\src\\Window.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAVAAAAAAAAAA==",
+              "ViewState": "AgIAAEsAAAAAAAAAAAAAADEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-10-02T06:30:07.49Z",
               "EditorCaption": ""
@@ -88,45 +94,72 @@
             {
               "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "Main.cpp",
-              "DocumentMoniker": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Main.cpp",
-              "RelativeDocumentMoniker": "..\\src\\Main.cpp",
-              "ToolTip": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Main.cpp",
-              "RelativeToolTip": "..\\src\\Main.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACMAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-10-02T06:30:04.575Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
               "Title": "CMakeLists.txt",
               "DocumentMoniker": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\CMakeLists.txt",
               "RelativeDocumentMoniker": "..\\CMakeLists.txt",
               "ToolTip": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\CMakeLists.txt",
               "RelativeToolTip": "..\\CMakeLists.txt",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
-              "WhenOpened": "2025-09-30T17:16:15.492Z"
+              "WhenOpened": "2025-09-30T17:16:15.492Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Module.h",
+              "DocumentMoniker": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Module.h",
+              "RelativeDocumentMoniker": "..\\src\\Module.h",
+              "ToolTip": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Module.h",
+              "RelativeToolTip": "..\\src\\Module.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-10-02T15:58:36.501Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Main.cpp",
+              "DocumentMoniker": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Main.cpp",
+              "RelativeDocumentMoniker": "..\\src\\Main.cpp",
+              "ToolTip": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Main.cpp",
+              "RelativeToolTip": "..\\src\\Main.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-02T06:30:04.575Z",
+              "EditorCaption": ""
             }
           ]
         },
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "Application.cpp",
               "DocumentMoniker": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Application.cpp",
               "RelativeDocumentMoniker": "..\\src\\Application.cpp",
               "ToolTip": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Application.cpp",
               "RelativeToolTip": "..\\src\\Application.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFgAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-10-02T06:30:21.123Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Input.cpp",
+              "DocumentMoniker": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Input.cpp",
+              "RelativeDocumentMoniker": "..\\src\\Input.cpp",
+              "ToolTip": "C:\\Users\\aalca\\Documents\\GitHub\\-engine\\Engine\\src\\Input.cpp",
+              "RelativeToolTip": "..\\src\\Input.cpp",
+              "ViewState": "AgIAADQAAAAAAAAAAAAlwEwAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-02T16:41:09.865Z",
               "EditorCaption": ""
             }
           ]

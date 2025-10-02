@@ -5,8 +5,10 @@ Application::Application() : isRunning(true)
 {
     std::cout << "Application Constructor" << std::endl;
     window = std::make_shared<Window>();
+    input = std::make_shared<Input>();
 
     AddModule(std::static_pointer_cast<Module>(window));
+    AddModule(std::static_pointer_cast<Input>(input));
 }
 
 Application& Application::GetInstance()
@@ -15,7 +17,6 @@ Application& Application::GetInstance()
     return instance;
 }
 
-// Add module to the list (for when we have more modules)
 void Application::AddModule(std::shared_ptr<Module> module)
 {
     moduleList.push_back(module);
@@ -43,8 +44,8 @@ bool Application::Update()
 {
     bool ret = true;
 
-    /*if (input->GetWindowEvent(WE_QUIT) == true)
-        ret = false;*/
+    if (input->GetWindowEvent(WE_QUIT) == true)
+        ret = false;
 
     if (ret == true)
         ret = PreUpdate();

@@ -4,6 +4,7 @@
 #include <list>
 #include "Window.h"
 #include "Module.h"
+#include "Input.h"
 
 class Module;
 
@@ -27,6 +28,7 @@ public:
 
     // Modules
     std::shared_ptr<Window> window;
+    std::shared_ptr<Input> input;
 
 private:
     // Private constructor for singleton

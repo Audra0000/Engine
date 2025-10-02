@@ -50,22 +50,22 @@ bool Window::Start()
 
 bool Window::Update()
 {
-    SDL_Event event;
+    /*SDL_Event event;*/
 
     // Poll events
-    while (SDL_PollEvent(&event))
-    {
-        if (event.type == SDL_EVENT_QUIT)
-        {
-            return false;
-        }
+    //while (SDL_PollEvent(&event))
+    //{
+    //    if (event.type == SDL_EVENT_QUIT)
+    //    {
+    //        return false;
+    //    }
 
-        // Handle window close button
-        if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
-        {
-            return false;
-        }
-    }
+    //    // Handle window close button
+    //    if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
+    //    {
+    //        return false;
+    //    }
+    //}
 
     return true;
 }
