@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 #include <iostream>
 
-OpenGL::OpenGL() : glContext(nullptr), shaderProgram(0), VAO_Triangle(0), VBO(0), VAO_Cube(0)
+OpenGL::OpenGL() : glContext(nullptr), shaderProgram(0), VAO_Triangle(0), VBO(0), VAO_Cube(0), VAO_Pyramid(0), VAO_Cylinder(0), EBO(0)
 {
     std::cout << "OpenGL Constructor" << std::endl;
 }
@@ -89,10 +89,8 @@ bool OpenGL::Start()
     glDeleteShader(fragmentShader);
 
     VAO_Triangle = CreateTriangle(); 
-    //glBindVertexArray(VAO_Triangle);
-
     VAO_Cube = CreateCube();
-    //glBindVertexArray(VAO_Cube);
+    VAO_Pyramid = CreatePyramid();
 
     std::cout << "OpenGL initialized successfully" << std::endl;
 
@@ -170,14 +168,59 @@ unsigned int OpenGL::CreateCube()
     return VAO;
 }
 
+unsigned int OpenGL::CreatePyramid()
+{
+    static float vertices[] = {
+        -0.5f, -0.5f,  0.5f,  // 0 (x, y, z)
+         0.5f, -0.5f,  0.5f,  // 1
+         0.5f, -0.5f,  -0.5f,  // 2
+        -0.5f, -0.5f,  0.5f,  // 3
+         0.0f,  0.5f,  0.0f,  // 4
+    };
+
+    static Uint indices[] = {
+        0, 1, 4,  // frontal
+        4, 3, 0,  // izquierda
+        4, 1, 2,  // derecha
+        4, 2, 3,  // derecha
+        0, 1, 2,  2, 3, 0,  // superior
+    };
+
+    Uint VAO, VBO, EBO;
+
+    // 
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    // VBO for vertices
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // EBO for indexes
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindVertexArray(0);
+
+    return VAO;
+}
+
 bool OpenGL::Update()
 {
     glUseProgram(shaderProgram);
     //glBindVertexArray(VAO_Triangle);
     //glDrawArrays(GL_TRIANGLES, 0, 3);
    
-    glBindVertexArray(VAO_Cube);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    //glBindVertexArray(VAO_Cube);
+    //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+    glBindVertexArray(VAO_Pyramid);
+    glDrawElements(GL_TRIANGLES, 16, GL_UNSIGNED_INT, 0);
     return true;
 }
 

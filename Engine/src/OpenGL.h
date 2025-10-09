@@ -14,6 +14,9 @@ public:
 
     unsigned int CreateTriangle();
     unsigned int CreateCube(); 
+    unsigned int CreatePyramid();
+    unsigned int CreateSphere();
+    unsigned int CreateCylinder();
 
 private:
 
@@ -21,7 +24,7 @@ private:
 
     SDL_GLContext glContext;
     unsigned int shaderProgram;
-    Uint VAO_Triangle, VAO_Cube;
+    Uint VAO_Triangle, VAO_Cube, VAO_Pyramid, VAO_Cylinder;
     Uint VBO, EBO;
     // EBO = Element buffer object
 
