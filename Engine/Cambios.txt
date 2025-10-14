@@ -1,16 +1,28 @@
 Modules/
+Modules/
 ├── Core/
-│   ├── Window (gestión ventana SDL)
-│   ├── Input (eventos)
-│   └── Application (orquestación)
+│   ├── Application
+│   ├── Window
+│   ├── Input
+│   └── Time (para deltaTime etc.) 
+│
 ├── Rendering/
-│   ├── RenderContext (inicialización OpenGL/contexto)
-│   ├── Shader (compilación y gestión de shaders)
-│   ├── Renderer (lógica de dibujado)
-│   └── Material (propiedades visuales)
-├── Resources/
-│   ├── MeshLoader (carga FBX/OBJ con Assimp)
-│   ├── MeshManager (almacenamiento de meshes)
-│   └── ResourceManager (gestión general de recursos)
-└── Scene/
-    └── GameObject/Entity (objetos con transform + mesh)
+│   ├── RenderContext (SDL + OpenGL context)
+│   ├── Renderer (draw calls, batching)
+│   ├── Shader
+│   ├── Material?
+│   ├── Camera 
+│   └── Primitives 
+│
+│
+├── Scene/
+│   ├── GameObject/Entity
+│   ├── Transform (position, rotation, scale) 
+│   ├── Component (base class) 
+│   ├── MeshRenderer (component) 
+│   └── SceneManager (gestión de la escena) 
+│
+└── Utils/
+    ├── Logger (sistema de logs) 
+    ├── FileSystem (I/O, paths) 
+    └── Math (helpers matemáticos)

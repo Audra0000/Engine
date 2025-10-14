@@ -5,7 +5,8 @@
 #include "Window.h"
 #include "Module.h"
 #include "Input.h"
-#include "OpenGL.h"
+#include "RenderContext.h"
+#include "Renderer.h"
 #include "FileSystem.h"
 
 class Module;
@@ -31,7 +32,8 @@ public:
     // Modules
     std::shared_ptr<Window> window;
     std::shared_ptr<Input> input;
-    std::shared_ptr<OpenGL> opengl;
+    std::shared_ptr<RenderContext> renderContext;
+    std::shared_ptr<Renderer> renderer;
     std::shared_ptr<FileSystem> filesystem;
 
 private:
