@@ -13,13 +13,15 @@ Shader::~Shader()
 
 bool Shader::Create()
 {
-    // Vertex Shader
+    // Vertex Shader - Ahora genera coordenadas UV desde la posicion
     const char* vertexShaderSource = "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;\n"
+        "out vec2 TexCoord;\n"
         "void main()\n"
         "{\n"
         "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-        "}\0";
+        "   TexCoord = aPos.xy + 0.5;\n"
+        "}\0"; // usar xy como coordenadas uv
 
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -37,12 +39,14 @@ bool Shader::Create()
         return false;
     }
 
-    // Fragment Shader
+    // Fragment Shader - Ahora usa la textura
     const char* fragmentShaderSource = "#version 330 core\n"
         "out vec4 FragColor;\n"
+        "in vec2 TexCoord;\n"
+        "uniform sampler2D texture1;\n"
         "void main()\n"
         "{\n"
-        "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+        "   FragColor = texture(texture1, TexCoord);\n"
         "}\0";
 
     unsigned int fragmentShader;

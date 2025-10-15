@@ -47,6 +47,4 @@ private:
 	std::vector<Mesh> meshes;
 	std::string assetsPath;
 
-	void InitializeAssetsPath();
-	bool ProcessScene(const struct aiScene* scene, float scale = 0.005f);
 };

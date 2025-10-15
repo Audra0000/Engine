@@ -1,7 +1,11 @@
 #pragma once
 #include "Module.h"
 #include "FileSystem.h"
+#pragma once
+#include "Module.h"
+#include "FileSystem.h"
 #include "Shaders.h"
+#include "Texture.h"
 #include <memory>
 #include "Primitives.h"
 
@@ -22,7 +26,7 @@ public:
     Shader* GetDefaultShader() const { return defaultShader.get(); }
 
 private:
-
     std::unique_ptr<Shader> defaultShader;
+    std::unique_ptr<Texture> checkerTexture;  // NUEVO
     Mesh sphere, cube, pyramid, cylinder, plane;
 };

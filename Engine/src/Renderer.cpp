@@ -2,10 +2,11 @@
 #include "Application.h"
 #include <glad/glad.h>
 #include <iostream>
+#include "Texture.h"
 
 Renderer::Renderer()
 {
-    std::cout << "Renderer Constructor" << std::endl;
+    LOG("Renderer Constructor");
 }
 
 Renderer::~Renderer()
@@ -14,18 +15,23 @@ Renderer::~Renderer()
 
 bool Renderer::Start()
 {
-    std::cout << "Initializing Renderer" << std::endl;
+    LOG("Initializing Renderer");
 
     // Create default shader
-    defaultShader = std::make_unique<Shader>();
+    defaultShader = make_unique<Shader>();
 
     if (!defaultShader->Create())
     {
-        std::cerr << "Failed to create default shader" << std::endl;
+        LOG("Failed to create default shader");
         return false;
     }
 
-    std::cout << "Renderer initialized successfully" << std::endl;
+    // Crear textura checkerboard
+    checkerTexture = make_unique<Texture>(); // make_unique es como hacer un new pero mas seguro
+    checkerTexture->CreateCheckerboard();
+    LOG("Checkerboard texture created");
+
+    LOG("Renderer initialized successfully");
 
     // Para pruebas
     sphere = Primitives::CreateSphere();
@@ -71,7 +77,7 @@ void Renderer::DrawMesh(const Mesh& mesh)
 {
     if (mesh.id_VAO == 0)
     {
-        std::cerr << "ERROR: Trying to draw mesh without VAO" << std::endl;
+        LOG("ERROR: Trying to draw mesh without VAO");
         return;
     }
 
@@ -105,8 +111,15 @@ bool Renderer::Update()
 {
     defaultShader->Use();
 
+    // Activar y bindear la textura
+    glActiveTexture(GL_TEXTURE0);
+    checkerTexture->Bind();
+
+    // Habilitar texturizado
+    glEnable(GL_TEXTURE_2D);
+
     // Renderizar todos los meshes cargados desde FileSystem
-    const std::vector<Mesh>& meshes = Application::GetInstance().filesystem->GetMeshes();
+    const vector<Mesh>& meshes = Application::GetInstance().filesystem->GetMeshes();
 
     if (!meshes.empty())
     {
@@ -122,12 +135,14 @@ bool Renderer::Update()
         DrawMesh(pyramid);
     }
 
+    checkerTexture->Unbind();
+
     return true;
 }
 
 bool Renderer::CleanUp()
 {
-    std::cout << "Cleaning up Renderer" << std::endl;
+    LOG( "Cleaning up Renderer");
 
     if (defaultShader)
     {

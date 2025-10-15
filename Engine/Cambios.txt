@@ -1,5 +1,4 @@
 Modules/
-Modules/
 ├── Core/
 │   ├── Application
 │   ├── Window
@@ -26,3 +25,23 @@ Modules/
     ├── Logger (sistema de logs) 
     ├── FileSystem (I/O, paths) 
     └── Math (helpers matemáticos)
+
+Ahora:
+Modules/
+├── Core/
+│   ├── Application
+│   ├── Window
+│   ├── Input
+│
+├── Rendering/
+│   ├── RenderContext (SDL + OpenGL context)
+│   ├── Renderer (draw calls, batching)
+│   ├── Shader
+    ├── Texture
+│   └── Primitives 
+    
+│
+└── Utils/
+    ├── Logger (sistema de logs) 
+    ├── FileSystem (I/O, paths)
+    ├── Globals

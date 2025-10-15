@@ -2,6 +2,9 @@
 
 #include <string>
 #include "Globals.h"
+#include "Log.h"
+
+using namespace std;
 
 class Module
 {
