@@ -8,6 +8,7 @@
 #include "RenderContext.h"
 #include "Renderer.h"
 #include "FileSystem.h"
+#include "Time.h"
 
 class Module;
 
@@ -35,6 +36,7 @@ public:
     std::shared_ptr<RenderContext> renderContext;
     std::shared_ptr<Renderer> renderer;
     std::shared_ptr<FileSystem> filesystem;
+    std::shared_ptr<Time> time; 
 
 private:
     // Private constructor for singleton

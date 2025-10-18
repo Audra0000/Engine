@@ -119,19 +119,24 @@ bool Input::PreUpdate()
 		}
 	}
 
-	const float cameraSpeed = 0.05f;
-	Camera* camera = Application::GetInstance().renderer->GetCamera();
-	glm::vec3 cameraFront = camera->GetFront();
-	glm::vec3 cameraRight = glm::normalize(glm::cross(cameraFront, camera->GetUp()));
+	// Solo activo cuando presionas click derecho
+	if (mouseButtons[SDL_BUTTON_RIGHT - 1] == KEY_REPEAT || mouseButtons[SDL_BUTTON_RIGHT - 1] == KEY_DOWN)
+	{
+		const float cameraBaseSpeed = 2.5f;
+		float cameraSpeed = cameraBaseSpeed * Application::GetInstance().time->GetDeltaTime();
+		Camera* camera = Application::GetInstance().renderer->GetCamera();
+		glm::vec3 cameraFront = camera->GetFront();
+		glm::vec3 cameraRight = glm::normalize(glm::cross(cameraFront, camera->GetUp()));
 
-	if (keys[SDL_SCANCODE_W])
-		camera->SetPosition(camera->GetPosition() + cameraSpeed * cameraFront);
-	if (keys[SDL_SCANCODE_S])
-		camera->SetPosition(camera->GetPosition() - cameraSpeed * cameraFront);
-	if (keys[SDL_SCANCODE_A])
-		camera->SetPosition(camera->GetPosition() - cameraRight * cameraSpeed);
-	if (keys[SDL_SCANCODE_D])
-		camera->SetPosition(camera->GetPosition() + cameraRight * cameraSpeed);
+		if (keys[SDL_SCANCODE_W])
+			camera->SetPosition(camera->GetPosition() + cameraSpeed * cameraFront);
+		if (keys[SDL_SCANCODE_S])
+			camera->SetPosition(camera->GetPosition() - cameraSpeed * cameraFront);
+		if (keys[SDL_SCANCODE_A])
+			camera->SetPosition(camera->GetPosition() - cameraRight * cameraSpeed);
+		if (keys[SDL_SCANCODE_D])
+			camera->SetPosition(camera->GetPosition() + cameraRight * cameraSpeed);
+	}
 
 	return true;
 }
