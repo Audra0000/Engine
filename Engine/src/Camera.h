@@ -17,6 +17,8 @@ public:
 	glm::vec3 GetFront() const { return cameraFront; }
 	glm::vec3 GetUp() const { return cameraUp; }
 	void SetPosition(const glm::vec3& newPosition) { cameraPos = newPosition; }
+	void HandleMouseInput(float xpos, float ypos);
+	void ResetMouseInput() { firstMouse = true; }
 
 private:
 	glm::vec3 cameraPos;
@@ -25,4 +27,13 @@ private:
 
 	glm::mat4 viewMatrix;
 	glm::mat4 projectionMatrix;
+
+	float yaw;
+	float pitch;
+	float lastX;
+	float lastY;
+	bool firstMouse;
+
+	void UpdateCameraVectors();
+	void ProcessMouseMovement(float xoffset, float yoffset);
 };

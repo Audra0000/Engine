@@ -93,6 +93,12 @@ bool Input::PreUpdate()
 			break;
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			mouseButtons[event.button.button - 1] = KEY_DOWN;
+			mouseButtons[event.button.button - 1] = KEY_DOWN;
+			if (event.button.button == SDL_BUTTON_RIGHT)
+			{
+				Camera* camera = Application::GetInstance().renderer->GetCamera();
+				camera->ResetMouseInput(); // Reinicia el tracking del ratón
+			}
 			break;
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 			mouseButtons[event.button.button - 1] = KEY_UP;
@@ -102,8 +108,15 @@ bool Input::PreUpdate()
 			int scale = Application::GetInstance().window.get()->GetScale();
 			mouseMotionX = event.motion.xrel / scale;
 			mouseMotionY = event.motion.yrel / scale;
-			mouseX = event.motion.x / scale;
-			mouseY = event.motion.y / scale;
+			float mouseXf = static_cast<float>(event.motion.x) / scale;
+			float mouseYf = static_cast<float>(event.motion.y) / scale;
+
+			// Manejo del raton para la camara
+			if (mouseButtons[SDL_BUTTON_RIGHT - 1] == KEY_REPEAT || mouseButtons[SDL_BUTTON_RIGHT - 1] == KEY_DOWN)
+			{
+				Camera* camera = Application::GetInstance().renderer->GetCamera();
+				camera->HandleMouseInput(mouseXf, mouseYf);
+			}
 		}
 		break;
 
@@ -117,13 +130,15 @@ bool Input::PreUpdate()
 			}
 			break;
 		}
+
 	}
 
 	// Solo activo cuando presionas click derecho
 	if (mouseButtons[SDL_BUTTON_RIGHT - 1] == KEY_REPEAT || mouseButtons[SDL_BUTTON_RIGHT - 1] == KEY_DOWN)
 	{
 		const float cameraBaseSpeed = 2.5f;
-		float cameraSpeed = cameraBaseSpeed * Application::GetInstance().time->GetDeltaTime();
+		float speedMultiplier = keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT] ? 2.0f : 1.0f;
+		float cameraSpeed = cameraBaseSpeed * speedMultiplier * Application::GetInstance().time->GetDeltaTime();
 		Camera* camera = Application::GetInstance().renderer->GetCamera();
 		glm::vec3 cameraFront = camera->GetFront();
 		glm::vec3 cameraRight = glm::normalize(glm::cross(cameraFront, camera->GetUp()));
@@ -153,12 +168,3 @@ bool Input::GetWindowEvent(EventWindow ev)
 	return windowEvents[ev];
 }
 
-//Vector2D Input::GetMousePosition()
-//{
-//	return Vector2D(mouseX, mouseY);
-//}
-//
-//Vector2D Input::GetMouseMotion()
-//{
-//	return Vector2D(mouseMotionX, mouseMotionY);
-//}
