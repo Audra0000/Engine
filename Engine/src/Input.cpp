@@ -6,7 +6,7 @@
 
 #define MAX_KEYS 300
 
-Input::Input() : Module(), droppedFile(false), droppedFilePath("")
+Input::Input() : Module(), droppedFile(false), droppedFilePath(""), droppedFileType(DROPPED_NONE)
 {
 	keyboard = new KeyState[MAX_KEYS];
 	// reserve memory
@@ -92,13 +92,24 @@ bool Input::PreUpdate()
 			windowEvents[WE_SHOW] = true;
 			break;
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		{
 			mouseButtons[event.button.button - 1] = KEY_DOWN;
+			Camera* camera = Application::GetInstance().renderer->GetCamera();
+
 			if (event.button.button == SDL_BUTTON_RIGHT)
 			{
-				Camera* camera = Application::GetInstance().renderer->GetCamera();
-				camera->ResetMouseInput(); // Reinicia el tracking del ratón
+				camera->ResetMouseInput();
+			}
+			else if (event.button.button == SDL_BUTTON_LEFT)
+			{
+				camera->ResetOrbitInput();
+			}
+			else if (event.button.button == SDL_BUTTON_MIDDLE)
+			{
+				camera->ResetPanInput();
 			}
 			break;
+		}
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 			mouseButtons[event.button.button - 1] = KEY_UP;
 			break;
@@ -110,22 +121,54 @@ bool Input::PreUpdate()
 			float mouseXf = static_cast<float>(event.motion.x) / static_cast<float>(scale);
 			float mouseYf = static_cast<float>(event.motion.y) / static_cast<float>(scale);
 
-			// Manejo del raton para la camara
-			if (mouseButtons[SDL_BUTTON_RIGHT - 1] == KEY_REPEAT || mouseButtons[SDL_BUTTON_RIGHT - 1] == KEY_DOWN)
+			Camera* camera = Application::GetInstance().renderer->GetCamera();
+
+			// Alt + Click Izquierdo - orbit
+			if ((keys[SDL_SCANCODE_LALT] || keys[SDL_SCANCODE_RALT]) &&
+				(mouseButtons[SDL_BUTTON_LEFT - 1] == KEY_REPEAT || mouseButtons[SDL_BUTTON_LEFT - 1] == KEY_DOWN))
 			{
-				Camera* camera = Application::GetInstance().renderer->GetCamera();
+				camera->HandleOrbitInput(mouseXf, mouseYf);
+			}
+			// Click Medio - Pan
+			else if (mouseButtons[SDL_BUTTON_MIDDLE - 1] == KEY_REPEAT || mouseButtons[SDL_BUTTON_MIDDLE - 1] == KEY_DOWN)
+			{
+				camera->HandlePanInput(static_cast<float>(mouseMotionX), static_cast<float>(mouseMotionY));
+			}
+			// Click Derecho - Look around 
+			else if (mouseButtons[SDL_BUTTON_RIGHT - 1] == KEY_REPEAT || mouseButtons[SDL_BUTTON_RIGHT - 1] == KEY_DOWN)
+			{
 				camera->HandleMouseInput(mouseXf, mouseYf);
 			}
 		}
 		break;
 
-		// Drag and Drop - Solo archivos FBX ahora
+		// Drag and Drop - FBX& textures
 		case SDL_EVENT_DROP_FILE:
 			if (event.drop.data != nullptr)
 			{
 				droppedFilePath = event.drop.data;
 				droppedFile = true;
 				std::cout << "File dropped: " << droppedFilePath << std::endl;
+
+				// Determine file type
+				if (droppedFilePath.size() >= 4)
+				{
+					std::string extension = droppedFilePath.substr(droppedFilePath.size() - 4);
+					for (char& c : extension) c = tolower(c);
+
+					if (extension == ".fbx")
+					{
+						droppedFileType = DROPPED_FBX;
+					}
+					else if (extension == ".png" || extension == ".dds")
+					{
+						droppedFileType = DROPPED_TEXTURE;
+					}
+					else
+					{
+						droppedFileType = DROPPED_NONE;
+					}
+				}
 			}
 			break;
 
@@ -138,7 +181,16 @@ bool Input::PreUpdate()
 		}
 	}
 
-	// Solo activo cuando presionas click derecho
+	// Tecla F - Focus en geometria (falta implementar logica seleccion)
+	//if (keyboard[SDL_SCANCODE_F] == KEY_DOWN)
+	//{
+	//	Camera* camera = Application::GetInstance().renderer->GetCamera();
+	//	glm::vec3 selectedObjectPosition(0.0f, 0.0f, 0.0f);
+	//	float selectedObjectRadius = 1.0f; // Radio aproximado del objeto
+	//	camera->FocusOnTarget(selectedObjectPosition, selectedObjectRadius);
+	//}
+
+	// Only active when you press right-click (WASD movement)
 	if (mouseButtons[SDL_BUTTON_RIGHT - 1] == KEY_REPEAT || mouseButtons[SDL_BUTTON_RIGHT - 1] == KEY_DOWN)
 	{
 		const float cameraBaseSpeed = 2.5f;

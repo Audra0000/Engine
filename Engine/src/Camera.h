@@ -23,6 +23,15 @@ public:
 	void HandleScrollInput(float yoffset);
 	void ResetMouseInput() { firstMouse = true; }
 
+	// for Unity controls
+	void HandleOrbitInput(float xpos, float ypos);
+	void HandlePanInput(float xoffset, float yoffset);
+	void FocusOnTarget(const glm::vec3& targetPosition, float targetRadius = 1.0f);
+	void SetOrbitTarget(const glm::vec3& target) { orbitTarget = target; }
+	glm::vec3 GetOrbitTarget() const { return orbitTarget; }
+	void ResetOrbitInput() { firstOrbit = true; }
+	void ResetPanInput() { firstPan = true; }
+
 private:
 	glm::vec3 cameraPos;
 	glm::vec3 cameraFront;
@@ -38,6 +47,19 @@ private:
 	bool firstMouse;
 	float fov;
 
+	// Variables for orbit
+	glm::vec3 orbitTarget;
+	float orbitDistance;
+	float lastOrbitX;
+	float lastOrbitY;
+	bool firstOrbit;
+
+	// Variables for bread
+	float lastPanX;
+	float lastPanY;
+	bool firstPan;
+
 	void UpdateCameraVectors();
 	void ProcessMouseMovement(float xoffset, float yoffset);
+	void UpdateOrbitPosition();
 };

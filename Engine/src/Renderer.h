@@ -22,13 +22,15 @@ public:
     void DrawMesh(const Mesh& mesh);
     void UnloadMesh(Mesh& mesh);
 
-    Shader* GetDefaultShader() const { return defaultShader.get(); }
+    // Cargar textura para el mesh actual
+    void LoadTexture(const std::string& path);
 
-    Camera* GetCamera() { return camera.get(); } 
+    Shader* GetDefaultShader() const { return defaultShader.get(); }
+    Camera* GetCamera() { return camera.get(); }
 
 private:
     std::unique_ptr<Shader> defaultShader;
-    std::unique_ptr<Texture> checkerTexture;  
+    std::unique_ptr<Texture> defaultTexture;
     Mesh sphere, cube, pyramid, cylinder, plane;
     unique_ptr<Camera> camera;
 };

@@ -1,9 +1,14 @@
 #include "Texture.h"
+#include <iostream>
+#include <windows.h>
+#include <IL/il.h>
+#include <IL/ilu.h>
+#include <fstream>
 
 #define CHECKERS_WIDTH 64
 #define CHECKERS_HEIGHT 64
 
-Texture::Texture() : textureID(0)
+Texture::Texture() : textureID(0), width(0), height(0), nrChannels(0)
 {
 }
 
@@ -28,7 +33,7 @@ void Texture::CreateCheckerboard()
         }
     }
 
-    // Generar textura en OpenGL
+    // Generate texture in OpenGL
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -43,9 +48,167 @@ void Texture::CreateCheckerboard()
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    //Mipmap?
-    // Antisotropic filtering 
-    // gl active texture
+    width = CHECKERS_WIDTH;
+    height = CHECKERS_HEIGHT;
+    nrChannels = 4;
+}
+
+void Texture::InitDevIL()
+{
+    static bool initialized = false;
+    if (!initialized)
+    {
+        ilInit();
+        iluInit();
+        initialized = true;
+        std::cout << "DevIL initialized" << std::endl;
+    }
+}
+
+// Helper function to normalize path separators
+std::string NormalizePath(const std::string& path)
+{
+    std::string normalized = path;
+    for (char& c : normalized)
+    {
+        if (c == '\\')
+            c = '/';
+    }
+    return normalized;
+}
+
+// Helper function to check if path is absolute
+bool IsAbsolutePath(const std::string& path)
+{
+    // Windows: Check for drive letter (C:, D:, etc.) or UNC path (\\)
+    if (path.length() >= 2)
+    {
+        if (path[1] == ':' || (path[0] == '\\' && path[1] == '\\'))
+            return true;
+    }
+    // Unix: Check for root (/)
+    if (!path.empty() && path[0] == '/')
+        return true;
+
+    return false;
+}
+
+// Helper function to check if file exists
+bool FileExists(const std::string& path)
+{
+    std::ifstream file(path);
+    return file.good();
+}
+
+bool Texture::LoadFromFile(const std::string& path, bool flipVertically)
+{
+ 
+    InitDevIL();
+
+    std::string fullPath;
+
+    // If the path is absolute (dropped file), use it directly
+    if (IsAbsolutePath(path))
+    {
+        fullPath = path;
+    }
+    else
+    {
+        // If relative, build path from executable
+        char buffer[MAX_PATH];
+        GetModuleFileNameA(NULL, buffer, MAX_PATH);
+        std::string execPath(buffer);
+        size_t pos = execPath.find_last_of("\\/");
+        std::string execDir = execPath.substr(0, pos);
+
+        // Go up two levels: from build/ to Engine/, then to root
+        pos = execDir.find_last_of("\\/");
+        std::string parentDir = execDir.substr(0, pos);
+        pos = parentDir.find_last_of("\\/");
+        std::string rootDir = parentDir.substr(0, pos);
+
+        // Build full path to texture
+        fullPath = rootDir + "\\" + path;
+    }
+
+    // Normalize the path (convert backslashes to forward slashes)
+    fullPath = NormalizePath(fullPath);
+
+    std::cout << "Trying to load texture with DevIL: " << fullPath << std::endl;
+
+    // Verify that the file exists before attempting to load it
+    if (!FileExists(fullPath))
+    {
+        std::cerr << "ERROR: File does not exist: " << fullPath << std::endl;
+        return false;
+    }
+
+    // Generate an image ID in DevIL
+    ILuint imageID;
+    ilGenImages(1, &imageID);
+    ilBindImage(imageID);
+
+    // Load the image
+    if (!ilLoadImage(fullPath.c_str()))
+    {
+        ILenum error = ilGetError();
+        std::cerr << "ERROR: Failed to load texture with DevIL: " << fullPath << std::endl;
+        std::cerr << "DevIL Error: " << iluErrorString(error) << std::endl;
+        ilDeleteImages(1, &imageID);
+        return false;
+    }
+
+    // Flip vertically if necessary (using basic IL functions)
+    if (flipVertically)
+    {
+        iluFlipImage();
+    }
+
+    // Convert the image to RGBA (standard format)
+    if (!ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE))
+    {
+        std::cerr << "ERROR: Failed to convert image to RGBA" << std::endl;
+        ilDeleteImages(1, &imageID);
+        return false;
+    }
+
+    // Get image information
+    width = ilGetInteger(IL_IMAGE_WIDTH);
+    height = ilGetInteger(IL_IMAGE_HEIGHT);
+    nrChannels = ilGetInteger(IL_IMAGE_CHANNELS);
+    ILubyte* data = ilGetData();
+
+    if (!data)
+    {
+        std::cerr << "ERROR: Failed to get image data from DevIL" << std::endl;
+        ilDeleteImages(1, &imageID);
+        return false;
+    }
+
+    // Generate and configure the texture in OpenGL
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // Configure wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Load image in OpenGL 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    ilDeleteImages(1, &imageID);
+
+    std::cout << "Texture loaded successfully with DevIL: " << fullPath << std::endl;
+    std::cout << "  Size: " << width << "x" << height << std::endl;
+    std::cout << "  Channels: " << nrChannels << std::endl;
+
+    return true;
 }
 
 void Texture::Bind()

@@ -30,14 +30,22 @@ bool Renderer::Start()
         return false;
     }
 
-    // Crear textura checkerboard
-    checkerTexture = make_unique<Texture>();
-    checkerTexture->CreateCheckerboard();
-    LOG("Checkerboard texture created");
+    // Crear textura desde archivo
+    defaultTexture = make_unique<Texture>();
+
+    if (!defaultTexture->LoadFromFile("Assets\\pruebas.png"))
+    {
+        LOG("Failed to load texture from file, using checkerboard");
+        defaultTexture->CreateCheckerboard();
+    }
+    else
+    {
+        LOG("Texture loaded successfully from file");
+    }
 
     LOG("Renderer initialized successfully");
 
-    // Para pruebas
+    // for testing
     sphere = Primitives::CreateSphere();
     LoadMesh(sphere);
     cylinder = Primitives::CreateCylinder();
@@ -60,7 +68,6 @@ void Renderer::LoadMesh(Mesh& mesh)
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, mesh.num_vertices * 3 * sizeof(float), mesh.vertices, GL_STATIC_DRAW);
 
-    // Position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
@@ -71,7 +78,6 @@ void Renderer::LoadMesh(Mesh& mesh)
         glBindBuffer(GL_ARRAY_BUFFER, texVBO);
         glBufferData(GL_ARRAY_BUFFER, mesh.num_vertices * 2 * sizeof(float), mesh.texCoords, GL_STATIC_DRAW);
 
-        // Texture coordinate attribute
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(1);
 
@@ -83,7 +89,6 @@ void Renderer::LoadMesh(Mesh& mesh)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.num_indices * sizeof(unsigned int), mesh.indices, GL_STATIC_DRAW);
 
-    // Save IDs in mesh
     mesh.id_vertex = VBO;
     mesh.id_index = EBO;
     mesh.id_VAO = VAO;
@@ -130,6 +135,22 @@ void Renderer::UnloadMesh(Mesh& mesh)
         mesh.id_texcoord = 0;
     }
 }
+
+void Renderer::LoadTexture(const std::string& path)
+{
+    auto newTexture = make_unique<Texture>();
+
+    if (newTexture->LoadFromFile(path))
+    {
+        defaultTexture = std::move(newTexture);
+        std::cout << "Texture applied successfully: " << path << std::endl;
+    }
+    else
+    {
+        std::cerr << "Failed to load texture: " << path << std::endl;
+    }
+}
+
 bool Renderer::PreUpdate()
 {
     return true;
@@ -137,28 +158,28 @@ bool Renderer::PreUpdate()
 
 bool Renderer::Update()
 {
+    glClearColor(0.2f, 0.25f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     defaultShader->Use();
 
-    // Actualizar camara
     camera->Update();
 
-    // Enviar matrices al shader
+    // send matrix to shader
     glUniformMatrix4fv(glGetUniformLocation(defaultShader->GetProgramID(), "projection"), 1, GL_FALSE, glm::value_ptr(camera->GetProjectionMatrix()));
     glUniformMatrix4fv(glGetUniformLocation(defaultShader->GetProgramID(), "view"), 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
 
-    // Activar y bindear la textura
+    // activate and bind texture 
     glActiveTexture(GL_TEXTURE0);
-    checkerTexture->Bind();
+    defaultTexture->Bind();
 
-    // Habilitar texturizado
-    glEnable(GL_TEXTURE_2D);
+    glUniform1i(glGetUniformLocation(defaultShader->GetProgramID(), "texture1"), 0);
 
-    // Renderizar todos los meshes cargados desde FileSystem
+    // render all meshes loaded in filesystem
     const vector<Mesh>& meshes = Application::GetInstance().filesystem->GetMeshes();
 
     if (!meshes.empty())
     {
-        // Si hay meshes cargados, dibujarlos
         for (const auto& mesh : meshes)
         {
             DrawMesh(mesh);
@@ -166,11 +187,11 @@ bool Renderer::Update()
     }
     else
     {
-        // Si no hay meshes, mostrar la piramide por defecto
+        // if there inst any meshes show pyramid
         DrawMesh(pyramid);
     }
 
-    checkerTexture->Unbind();
+    defaultTexture->Unbind();
 
     return true;
 }

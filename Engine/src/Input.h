@@ -20,29 +20,26 @@ enum KeyState
 	KEY_UP
 };
 
+enum DroppedFileType
+{
+	DROPPED_NONE = 0,
+	DROPPED_FBX,
+	DROPPED_TEXTURE
+};
+
 class Input : public Module
 {
 
 public:
 
 	Input();
-
-	// Destructor
 	~Input();
 
-	// Called before render is available
 	bool Awake() override;
-
-	// Called before the first frame
 	bool Start() override;
-
-	// Called each loop iteration
 	bool PreUpdate() override;
-
-	// Called before quitting
 	bool CleanUp() override;
 
-	// Check key states (includes mouse and joy buttons)
 	KeyState GetKey(int id) const
 	{
 		return keyboard[id];
@@ -53,17 +50,13 @@ public:
 		return mouseButtons[id - 1];
 	}
 
-	// Check if a certain window event happened
 	bool GetWindowEvent(EventWindow ev);
 
 	// Drag and Drop functions
 	bool HasDroppedFile() const { return droppedFile; }
 	const std::string& GetDroppedFilePath() const { return droppedFilePath; }
-	void ClearDroppedFile() { droppedFile = false; droppedFilePath.clear(); }
-
-	// Get mouse / axis position
-	//Vector2D GetMousePosition();
-	//Vector2D GetMouseMotion();
+	DroppedFileType GetDroppedFileType() const { return droppedFileType; }
+	void ClearDroppedFile() { droppedFile = false; droppedFilePath.clear(); droppedFileType = DROPPED_NONE; }
 
 private:
 	bool windowEvents[WE_COUNT];
@@ -77,4 +70,5 @@ private:
 	// Drag and Drop
 	bool droppedFile;
 	std::string droppedFilePath;
+	DroppedFileType droppedFileType;
 };

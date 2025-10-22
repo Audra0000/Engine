@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <string>
 
 class Texture
 {
@@ -8,8 +9,13 @@ public:
     Texture();
     ~Texture();
 
-    // Crear textura checkerboard
+    // Initialize DevIL (called automatically)
+    static void InitDevIL();
+
     void CreateCheckerboard();
+
+    // Load texture from file
+    bool LoadFromFile(const std::string& path, bool flipVertically = true);
 
     // Bind/Unbind
     void Bind();
@@ -17,6 +23,14 @@ public:
 
     GLuint GetID() const { return textureID; }
 
+    // Texture information
+    int GetWidth() const { return width; }
+    int GetHeight() const { return height; }
+    int GetChannels() const { return nrChannels; }
+
 private:
     GLuint textureID;
+    int width;
+    int height;
+    int nrChannels;
 };
