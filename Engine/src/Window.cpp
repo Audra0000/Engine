@@ -1,5 +1,6 @@
 #include "Window.h"
 #include <iostream>
+#include <glad/glad.h>
 
 Window::Window() : window(nullptr), width(1280), height(720), scale(1)
 {
@@ -22,8 +23,8 @@ bool Window::Start()
     }
 
     // Set OpenGL version to 4.6
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);  // Major version
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);  // Minor version
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
 
     // Use the core OpenGL profile (modern functions only)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -39,7 +40,7 @@ bool Window::Start()
         "SDL3 OpenGL Window",
         width,
         height,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE  // Añade SDL_WINDOW_OPENGL
+        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
     );
 
     if (window == nullptr)
@@ -53,12 +54,22 @@ bool Window::Start()
 
 bool Window::Update()
 {
+    int newWidth, newHeight;
+    SDL_GetWindowSize(window, &newWidth, &newHeight);
+
+    if (newWidth != width || newHeight != height)
+    {
+        width = newWidth;
+        height = newHeight;
+        glViewport(0, 0, width, height);
+    }
+
     return true;
 }
 
 bool Window::PostUpdate()
 {
-    Render(); 
+    Render();
     return true;
 }
 
@@ -82,8 +93,7 @@ bool Window::CleanUp()
 
 void Window::GetWindowSize(int& width, int& height) const
 {
-    width = this->width;
-    height = this->height;
+    SDL_GetWindowSize(window, &width, &height);
 }
 
 int Window::GetScale() const

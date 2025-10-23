@@ -19,6 +19,8 @@ public:
 	float GetFov() const { return fov; }
 
 	void SetPosition(const glm::vec3& newPosition) { cameraPos = newPosition; }
+	void SetAspectRatio(float aspectRatio);  
+
 	void HandleMouseInput(float xpos, float ypos);
 	void HandleScrollInput(float yoffset);
 	void ResetMouseInput() { firstMouse = true; }
@@ -46,6 +48,7 @@ private:
 	float lastY;
 	bool firstMouse;
 	float fov;
+	float aspectRatio;  
 
 	// Variables for orbit
 	glm::vec3 orbitTarget;
@@ -54,7 +57,7 @@ private:
 	float lastOrbitY;
 	bool firstOrbit;
 
-	// Variables for bread
+	// Variables for pan
 	float lastPanX;
 	float lastPanY;
 	bool firstPan;
@@ -62,4 +65,5 @@ private:
 	void UpdateCameraVectors();
 	void ProcessMouseMovement(float xoffset, float yoffset);
 	void UpdateOrbitPosition();
+	void UpdateProjectionMatrix();  
 };

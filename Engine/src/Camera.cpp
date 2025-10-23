@@ -14,6 +14,7 @@ Camera::Camera()
 	lastY(300.0f),
 	firstMouse(true),
 	fov(45.0f),
+	aspectRatio(16.0f / 9.0f), 
 	orbitTarget(0.0f, 0.0f, 0.0f),
 	orbitDistance(3.0f),
 	lastOrbitX(400.0f),
@@ -23,6 +24,7 @@ Camera::Camera()
 	lastPanY(300.0f),
 	firstPan(true)
 {
+	UpdateProjectionMatrix();
 }
 
 Camera::~Camera()
@@ -37,6 +39,25 @@ void Camera::UpdateCameraVectors()
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
 	cameraFront = glm::normalize(direction);
+}
+
+void Camera::UpdateProjectionMatrix()
+{
+	projectionMatrix = glm::perspective(
+		glm::radians(fov),
+		aspectRatio,  
+		0.1f,
+		100.0f
+	);
+}
+
+void Camera::SetAspectRatio(float newAspectRatio)
+{
+	if (aspectRatio != newAspectRatio)
+	{
+		aspectRatio = newAspectRatio;
+		UpdateProjectionMatrix();
+	}
 }
 
 void Camera::ProcessMouseMovement(float xoffset, float yoffset)
@@ -81,6 +102,8 @@ void Camera::HandleScrollInput(float yoffset)
 		fov = 1.0f;
 	if (fov > 45.0f)
 		fov = 45.0f;
+
+	UpdateProjectionMatrix();  
 }
 
 void Camera::HandleOrbitInput(float xpos, float ypos)
@@ -160,8 +183,5 @@ void Camera::FocusOnTarget(const glm::vec3& targetPosition, float targetRadius)
 void Camera::Update()
 {
 	UpdateCameraVectors();
-
-	projectionMatrix = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
-
 	viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 }

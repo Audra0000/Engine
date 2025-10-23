@@ -165,6 +165,13 @@ bool Renderer::Update()
 
     camera->Update();
 
+    int width, height;
+    Application::GetInstance().window->GetWindowSize(width, height);
+
+    // Update aspect ratio 
+    float aspectRatio = (float)width / (float)height;
+    camera->SetAspectRatio(aspectRatio);
+
     // send matrix to shader
     glUniformMatrix4fv(glGetUniformLocation(defaultShader->GetProgramID(), "projection"), 1, GL_FALSE, glm::value_ptr(camera->GetProjectionMatrix()));
     glUniformMatrix4fv(glGetUniformLocation(defaultShader->GetProgramID(), "view"), 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
