@@ -158,12 +158,6 @@ bool Texture::LoadFromFile(const std::string& path, bool flipVertically)
         return false;
     }
 
-    // Flip vertically if necessary (using basic IL functions)
-    if (flipVertically)
-    {
-        iluFlipImage();
-    }
-
     // Convert the image to RGBA (standard format)
     if (!ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE))
     {

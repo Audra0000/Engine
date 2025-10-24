@@ -38,7 +38,7 @@ bool Renderer::Start()
     // Crear textura desde archivo
     defaultTexture = make_unique<Texture>();
 
-    if (!defaultTexture->LoadFromFile("Assets\\pruebas.png"))
+    if (!defaultTexture->LoadFromFile("Assets\\Baker_house.png"))
     {
         LOG("Failed to load texture from file, using checkerboard");
         defaultTexture->CreateCheckerboard();

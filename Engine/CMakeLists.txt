@@ -44,11 +44,27 @@ set(UTILS_SRC
     src/Texture.cpp
 )
 
+set(GAMEOBJECTS_SRC 
+    src/Component.h  
+    src/Component.cpp 
+    src/ComponentMaterial.cpp 
+    src/ComponentMaterial.h  
+    src/ComponentMesh.h  
+    src/ComponentMesh.cpp 
+    src/GameObject.cpp 
+    src/GameObject.h 
+    src/ModuleScene.cpp 
+    src/ModuleScene.h 
+    src/Transform.cpp 
+    src/Transform.h 
+)
+
 source_group("Source\\Core" FILES ${CORE_SRC})
 source_group("Source\\Rendering" FILES ${RENDERING_SRC})
 source_group("Source\\Utils" FILES ${UTILS_SRC})
+source_group("Source\\Game Objects" FILES ${GAMEOBJECTS_SRC})
 
-set(SRCS ${CORE_SRC} ${RENDERING_SRC} ${UTILS_SRC})
+set(SRCS ${CORE_SRC} ${RENDERING_SRC} ${UTILS_SRC} ${GAMEOBJECTS_SRC})
 
 add_executable(Engine ${SRCS})
 

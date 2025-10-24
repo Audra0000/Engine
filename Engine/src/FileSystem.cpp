@@ -32,20 +32,20 @@ bool FileSystem::Start()
 	pos = parentDir.find_last_of("\\/");
 	std::string rootDir = parentDir.substr(0, pos);
 
-	std::string warriorPath = rootDir + "\\Assets\\warrior.fbx";
+	std::string housePath = rootDir + "\\Assets\\BakerHouse.fbx";
 
-	std::cout << "Trying to load: " << warriorPath << std::endl;
+	std::cout << "Trying to load: " << housePath << std::endl;
 
 	unsigned int importFlags = aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_ConvertToLeftHanded;
 
-	/*if (LoadFBX(warriorPath, importFlags))
+	if (LoadFBX(housePath, importFlags))
 	{
 		std::cout << "Successfully loaded warrior.fbx!" << std::endl;
 	}
 	else
 	{
 		std::cerr << "Failed to load warrior.fbx. Use drag & drop." << std::endl;
-	}*/
+	}
 	// For loading Baker_house at the beggining
 	return true;
 }
