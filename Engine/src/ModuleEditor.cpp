@@ -50,6 +50,7 @@ bool ModuleEditor::PreUpdate()
 
 bool ModuleEditor::Update()
 {
+
     DrawConsoleWindow();
 
     DrawConfigurationWindow();
@@ -63,11 +64,8 @@ bool ModuleEditor::Update()
 
 bool ModuleEditor::PostUpdate()
 {
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	ShowMenuBar();
-	ShowTest();
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -126,39 +124,7 @@ bool ModuleEditor::ShowMenuBar() {
 	return true;
 }
 
-bool ModuleEditor::ShowTest() {
-	float f = 0.5f;
-	char buf[256] = "";
 
-    // FPS Graph
-    if (ImGui::CollapsingHeader("FPS", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        DrawFPSGraph();
-    }
-
-    ImGui::Separator();
-
-    // Window
-    if (ImGui::CollapsingHeader("Window", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        DrawWindowSettings();
-    }
-
-    ImGui::Separator();
-
-	ImGui::Text("FPS: %.f", fps);
-	ImGui::PlotLines("FPS", fpsHistory.data(), fpsHistory.size(), 0, NULL, 0.0f, FLT_MAX, ImVec2(0, 80));
-	ImGui::Separator();
-	ImGui::PlotHistogram("FPS", fpsHistory.data(), fpsHistory.size(), 0, NULL, 0.0f, FLT_MAX, ImVec2(0, 80));
-
-
-	if (ImGui::Button("Save")) {
-		//etc
-	}
-	ImGui::InputText("Input", buf, IM_ARRAYSIZE(buf));
-	ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-	return true;
-}
 
 void ModuleEditor::DrawConfigurationWindow()
 {

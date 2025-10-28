@@ -45,7 +45,6 @@ private:
     float fpsTimer = 0.0f;
 
 	bool ShowMenuBar();
-	bool ShowTest();
 
     bool showConsole = true;
     bool showConfiguration = true;
