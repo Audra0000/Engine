@@ -4,6 +4,8 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
 #include <vector>
+#include <string>
+#include "ComponentMesh.h"
 
 class ModuleEditor : public Module
 {
@@ -19,31 +21,35 @@ public:
 
 private:
 
-    // Configuraciónn
+    bool ShowMenuBar();
+
+    // Configuration
     void DrawConfigurationWindow();
     void DrawFPSGraph();
     void DrawHardwareInfo();
     void DrawWindowSettings();
 
-    // Jerarqía
+    // Hierarchy
     void DrawHierarchyWindow();
 
     // Inspector
     void DrawInspectorWindow();
 
-    // Consola
+    // Console
     void DrawConsoleWindow();
+
+    // About
+    void DrawAboutWindow();
+
+    // Primitives
+    void CreatePrimitiveGameObject(const std::string& name, Mesh mesh);
 
 private:
 
-
-    
     // FPS
     std::vector<float> fpsHistory;
     const int maxFPSHistory = 100;
     float fpsTimer = 0.0f;
-
-	bool ShowMenuBar();
 
     bool showConsole = true;
     bool showConfiguration = true;
@@ -59,7 +65,7 @@ private:
     bool showInfo = true;
     bool showSuccess = true;
     bool showLoading = true;
-	bool showLibraryInfo = true;
+    bool showLibraryInfo = true;
     bool autoScroll = true;
     bool scrollToBottom = false;
     int lastWindowWidth = 0;
