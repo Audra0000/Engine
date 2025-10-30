@@ -388,7 +388,7 @@ GameObject* FindClosestObjectToRay(GameObject* obj, const glm::vec3& rayOrigin, 
 				{
 					minDist = dist;
 					closest = obj;
-					LOG("Ray hit '%s' at distance %.2f", obj->GetName().c_str(), dist);
+					LOG_DEBUG("Ray hit '%s' at distance %.2f", obj->GetName().c_str(), dist);
 				}
 			}
 		}

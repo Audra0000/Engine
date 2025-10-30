@@ -9,7 +9,7 @@ void SelectionManager::SetSelectedObject(GameObject* obj)
 	if (obj != nullptr)
 	{
 		selectedObjects.push_back(obj);
-		LOG("Selected object: %s", obj->GetName().c_str());
+		LOG_DEBUG("Selected object: %s", obj->GetName().c_str());
 	}
 }
 
@@ -20,7 +20,7 @@ void SelectionManager::AddToSelection(GameObject* obj)
 	if (!IsSelected(obj))
 	{
 		selectedObjects.push_back(obj);
-		LOG("Added to selection: %s (total: %d)", obj->GetName().c_str(), static_cast<int>(selectedObjects.size()));
+		LOG_DEBUG("Added to selection: %s (total: %d)", obj->GetName().c_str(), static_cast<int>(selectedObjects.size()));
 	}
 }
 
@@ -32,7 +32,7 @@ void SelectionManager::RemoveFromSelection(GameObject* obj)
 	if (it != selectedObjects.end())
 	{
 		selectedObjects.erase(it);
-		LOG("Removed from selection: %s (total: %d)", obj->GetName().c_str(), static_cast<int>(selectedObjects.size()));
+		LOG_DEBUG("Removed from selection: %s (total: %d)", obj->GetName().c_str(), static_cast<int>(selectedObjects.size()));
 	}
 }
 
@@ -54,7 +54,7 @@ void SelectionManager::ClearSelection()
 {
 	if (!selectedObjects.empty())
 	{
-		LOG("Selection cleared");
+		LOG_DEBUG("Selection cleared");
 		selectedObjects.clear();
 	}
 }
