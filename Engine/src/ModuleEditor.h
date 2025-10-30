@@ -19,13 +19,13 @@ public:
 
 private:
 
-    // Configuraci��n
+    // Configuraciónn
     void DrawConfigurationWindow();
     void DrawFPSGraph();
     void DrawHardwareInfo();
     void DrawWindowSettings();
 
-    // Jerarq��a
+    // Jerarqía
     void DrawHierarchyWindow();
 
     // Inspector
@@ -36,8 +36,7 @@ private:
 
 private:
 
-    bool fullscreen = false;
-    float brightness = 1.0f;
+
     
     // FPS
     std::vector<float> fpsHistory;
@@ -52,4 +51,28 @@ private:
     bool showInspector = true;
     bool showAbout = false;
 
+    bool fullscreen = false;
+    float brightness = 1.0f;
+
+    bool showErrors = true;
+    bool showWarnings = true;
+    bool showInfo = true;
+    bool showSuccess = true;
+    bool showLoading = true;
+	bool showLibraryInfo = true;
+    bool autoScroll = true;
+    bool scrollToBottom = false;
+    int lastWindowWidth = 0;
+    int lastWindowHeight = 0;
+
+    struct WindowState {
+        ImVec2 pos;
+        ImVec2 size;
+        bool initialized = false;
+    };
+
+    WindowState configWindow;
+    WindowState consoleWindow;
+    WindowState hierarchyWindow;
+    WindowState inspectorWindow;
 };

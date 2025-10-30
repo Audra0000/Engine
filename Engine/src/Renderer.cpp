@@ -13,7 +13,7 @@
 
 Renderer::Renderer()
 {
-    LOG("Renderer Constructor");
+    LOG_DEBUG("Renderer Constructor");
     camera = make_unique<Camera>();
 }
 
@@ -23,35 +23,41 @@ Renderer::~Renderer()
 
 bool Renderer::Start()
 {
-    LOG("Initializing Renderer");
+    LOG_DEBUG("=== Initializing Renderer Module ===");
+    LOG_CONSOLE("Initializing renderer and shaders...");
 
     // Create default shader
     defaultShader = make_unique<Shader>();
 
     if (!defaultShader->Create())
     {
-        LOG("Failed to create default shader");
+        LOG_DEBUG("ERROR: Failed to create default shader");
+        LOG_CONSOLE("ERROR: Failed to compile shaders");
         return false;
     }
     else
     {
-        std::cout << "Shader created successfully!" << std::endl;
-        std::cout << "Shader Program ID: " << defaultShader->GetProgramID() << std::endl;
+        LOG_DEBUG("Shader created successfully - Program ID: %d", defaultShader->GetProgramID());
+        LOG_CONSOLE("OpenGL shaders compiled successfully");
     }
     // Create default texture
     defaultTexture = make_unique<Texture>();
 
     if (!defaultTexture->LoadFromFile("Assets\\Baker_house.png"))
     {
-        LOG("Failed to load texture from file, using checkerboard");
+        LOG_DEBUG("WARNING: Could not load default texture from file");
+        LOG_DEBUG("Creating fallback checkerboard texture");
+        LOG_CONSOLE("WARNING: Using default checkerboard texture");
         defaultTexture->CreateCheckerboard();
     }
     else
     {
-        LOG("Texture loaded successfully from file");
+        LOG_DEBUG("Texture loaded successfully from file");
+
     }
 
-    LOG("Renderer initialized successfully");
+    LOG_DEBUG("Renderer initialized successfully");
+    LOG_CONSOLE("Renderer ready");
 
     // for testing
     sphere = Primitives::CreateSphere();
@@ -94,14 +100,15 @@ void Renderer::LoadMesh(Mesh& mesh)
 
     glBindVertexArray(0);
 
-    LOG("Mesh loaded - VAO: %d, Vertices: %d, Indices: %d", mesh.VAO, mesh.vertices.size(), mesh.indices.size());
+    LOG_DEBUG("Mesh loaded - VAO: %d, Vertices: %d, Indices: %d", mesh.VAO, mesh.vertices.size(), mesh.indices.size());
 }
 
 void Renderer::DrawMesh(const Mesh& mesh)
 {
     if (mesh.VAO == 0)
     {
-        LOG("ERROR: Trying to draw mesh without VAO");
+        LOG_DEBUG("ERROR: Trying to draw mesh without VAO");
+        LOG_CONSOLE("Render error: Invalid mesh");
         return;
     }
 
@@ -141,16 +148,22 @@ void Renderer::UnloadMesh(Mesh& mesh)
 
 void Renderer::LoadTexture(const std::string& path)
 {
+
+    LOG_DEBUG("Renderer: Loading new texture");
+    LOG_CONSOLE("Loading texture...");
+
     auto newTexture = make_unique<Texture>();
 
     if (newTexture->LoadFromFile(path))
     {
         defaultTexture = std::move(newTexture);
-        std::cout << "Texture applied successfully: " << path << std::endl;
+        LOG_DEBUG("Renderer: Texture applied successfully");
+        LOG_CONSOLE("Texture applied to scene");
     }
     else
     {
-        std::cerr << "Failed to load texture: " << path << std::endl;
+        LOG_DEBUG("ERROR: Renderer failed to load texture: %s", path.c_str());
+        LOG_CONSOLE("Failed to apply texture");
     }
 }
 
@@ -198,7 +211,7 @@ bool Renderer::Update()
 
 bool Renderer::CleanUp()
 {
-    LOG("Cleaning up Renderer");
+    LOG_DEBUG("Cleaning up Renderer");
 
     // Unload test primitives
     UnloadMesh(sphere);
@@ -209,6 +222,9 @@ bool Renderer::CleanUp()
     {
         defaultShader->Delete();
     }
+
+    LOG_DEBUG("Renderer cleaned up successfully");
+    LOG_CONSOLE("Renderer shutdown complete");
 
     return true;
 }

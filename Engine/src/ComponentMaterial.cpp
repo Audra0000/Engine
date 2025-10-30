@@ -29,7 +29,7 @@ void ComponentMaterial::OnEditor()
 
 bool ComponentMaterial::LoadTexture(const std::string& path)
 {
-    LOG("ComponentMaterial: Loading texture from %s", path);
+    LOG_DEBUG("ComponentMaterial: Loading texture from %s", path.c_str());
 
     auto newTexture = std::make_unique<Texture>();
 
@@ -38,13 +38,16 @@ bool ComponentMaterial::LoadTexture(const std::string& path)
         texture = std::move(newTexture);
         texturePath = path;
 
-        LOG("ComponentMaterial: Texture loaded");
+        LOG_DEBUG("ComponentMaterial: Texture loaded");
+        LOG_CONSOLE("Texture loaded: %s", path.c_str());
 
         return true;
     }
     else
     {
-        LOG("ComponentMaterial: Failed to load texture");
+        LOG_DEBUG("ComponentMaterial: Failed to load texture: %s", path.c_str());
+        LOG_CONSOLE("Failed to load texture");
+
         return false;
     }
 }
@@ -52,7 +55,7 @@ bool ComponentMaterial::LoadTexture(const std::string& path)
 void ComponentMaterial::CreateCheckerboardTexture()
 {
 
-    LOG("ComponentMaterial: Checkerboard texture created");
+    LOG_DEBUG("ComponentMaterial: Checkerboard texture created");
 
     texture = std::make_unique<Texture>();
 

@@ -1,6 +1,7 @@
 #include "Window.h"
 #include <iostream>
 #include <glad/glad.h>
+#include "Log.h"
 
 Window::Window() : window(nullptr), width(1280), height(720), scale(1)
 {
@@ -13,12 +14,14 @@ Window::~Window()
 
 bool Window::Start()
 {
-    std::cout << "Init SDL3 Window" << std::endl;
+    LOG_DEBUG("=== Initializing Window Module ===");
+    LOG_CONSOLE("Initializing SDL3 and OpenGL...");
 
     // Initialize SDL3
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
-        std::cerr << "SDL_Init failed! SDL Error: " << SDL_GetError() << std::endl;
+        LOG_DEBUG("ERROR: SDL_Init failed - %s", SDL_GetError());
+        LOG_CONSOLE("ERROR: Failed to initialize SDL3");
         return false;
     }
 
@@ -35,6 +38,12 @@ bool Window::Start()
     // Set depth buffer to 24 bits for proper 3D rendering
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
+    int sdlVersion = SDL_GetVersion();
+    int major = SDL_VERSIONNUM_MAJOR(sdlVersion);
+    int minor = SDL_VERSIONNUM_MINOR(sdlVersion);
+    int patch = SDL_VERSIONNUM_MICRO(sdlVersion);
+    LOG_CONSOLE("SDL3 initialized - Version: %d.%d.%d", major, minor, patch);
+
     // Create window WITH OpenGL flag
     window = SDL_CreateWindow(
         "SDL3 OpenGL Window",
@@ -43,11 +52,16 @@ bool Window::Start()
         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
     );
 
+
     if (window == nullptr)
     {
-        std::cerr << "Window creation failed! SDL Error: " << SDL_GetError() << std::endl;
+        LOG_DEBUG("ERROR: Window creation failed - %s", SDL_GetError());
+        LOG_CONSOLE("ERROR: Failed to create window");
         return false;
     }
+
+    LOG_DEBUG("Window created successfully");
+    LOG_CONSOLE("Window created: %dx%d with OpenGL", width, height);
 
     return true;
 }
@@ -80,7 +94,7 @@ void Window::Render()
 
 bool Window::CleanUp()
 {
-    std::cout << "Destroying SDL Window" << std::endl;
+    LOG_DEBUG("Destroying SDL window");
     if (window != nullptr)
     {
         SDL_DestroyWindow(window);
@@ -88,6 +102,8 @@ bool Window::CleanUp()
     }
 
     SDL_Quit();
+
+    LOG_CONSOLE("Window closed");
     return true;
 }
 

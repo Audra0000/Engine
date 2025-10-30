@@ -3,10 +3,33 @@
 
 #include <cstdio>
 #include <cstdarg>
+#include <string>
+#include <vector>
 
-#define LOG(format, ...) Log(__FILE__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_CONSOLE(format, ...) LogConsole(__FILE__, __LINE__, format, ##__VA_ARGS__)
+#define LOG_DEBUG(format, ...) LogDebug(__FILE__, __LINE__, format, ##__VA_ARGS__)
 
-void Log(const char file[], int line, const char* format, ...);
+void LogConsole(const char file[], int line, const char* format, ...);
+void LogDebug(const char file[], int line, const char* format, ...);
+
+class ConsoleLog
+{
+public:
+    static ConsoleLog& GetInstance();
+
+    void AddLog(const std::string& message);
+    void Clear();
+    const std::vector<std::string>& GetLogs() const { return logs; }
+
+private:
+    ConsoleLog() = default;
+    ~ConsoleLog() = default;
+
+    ConsoleLog(const ConsoleLog&) = delete;
+    ConsoleLog& operator=(const ConsoleLog&) = delete;
+
+    std::vector<std::string> logs;
+};
 
 #endif  // __LOG_H__
 

@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL_init.h>       // SDL_Init, SDL_Quit
 #include <SDL3/SDL_error.h>      // SDL_GetError
+#include <SDL3/SDL.H>
 #include "Module.h"
 
 class Window : public Module

@@ -3,7 +3,9 @@
 
 Application::Application() : isRunning(true)
 {
-    std::cout << "Application Constructor" << std::endl;
+    LOG_DEBUG("=== Creating Application Instance ===");
+    LOG_CONSOLE("Starting engine...");
+
     window = std::make_shared<Window>();
     input = std::make_shared<Input>();
     renderContext = std::make_shared<RenderContext>();
@@ -44,12 +46,21 @@ bool Application::Awake()
 
 bool Application::Start()
 {
+    LOG_CONSOLE("Starting engine modules...");
+
     bool result = true;
     for (const auto& module : moduleList) {
         result = module.get()->Start();
         if (!result) {
+            LOG_DEBUG("ERROR: Module failed to start: %s", module->name.c_str());
+            LOG_CONSOLE("ERROR: Failed to initialize module: %s", module->name.c_str());
             break;
         }
+    }
+
+    if (result)
+    {
+        LOG_CONSOLE("Engine ready - All systems initialized");
     }
 
     return true;
@@ -58,13 +69,19 @@ bool Application::Start()
 bool Application::Update()
 {
     // Check if exit was requested from menu first
-    if (!isRunning)
+    if (!isRunning) {
+        LOG_DEBUG("Exit requested by user");
+        LOG_CONSOLE("Shutting down...");
         return false;
+    }
 
     bool ret = true;
 
-    if (input->GetWindowEvent(WE_QUIT) == true)
+    if (input->GetWindowEvent(WE_QUIT) == true) {
+        LOG_DEBUG("Window close event detected");
+        LOG_CONSOLE("Shutting down...");
         ret = false;
+    }
 
     if (ret == true)
         ret = PreUpdate();
@@ -133,7 +150,8 @@ bool Application::PostUpdate()
 
 bool Application::CleanUp()
 {
-    std::cout << "Application CleanUp" << std::endl;
+    LOG_DEBUG("=== Cleaning Up Application ===");
+    LOG_CONSOLE("Cleaning up modules...");
 
     bool result = true;
     for (const auto& module : moduleList) {
@@ -143,5 +161,7 @@ bool Application::CleanUp()
         }
     }
 
+    LOG_DEBUG("=== Application Cleanup Complete ===");
+    LOG_CONSOLE("Shutdown complete");
     return result;
 }

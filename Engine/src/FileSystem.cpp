@@ -19,6 +19,10 @@ bool FileSystem::Awake()
 
 bool FileSystem::Start()
 {
+
+    LOG_DEBUG("Initializing FileSystem module");
+    LOG_CONSOLE("FileSystem initialized");
+
     // Get directory of executable
     char buffer[MAX_PATH];
     GetModuleFileNameA(NULL, buffer, MAX_PATH);
@@ -34,7 +38,8 @@ bool FileSystem::Start()
 
     std::string housePath = rootDir + "\\Assets\\BakerHouse.fbx";
 
-    std::cout << "Trying to load: " << housePath << std::endl;
+    LOG_DEBUG("Attempting to load default model: %s", housePath.c_str());
+    LOG_CONSOLE("Loading default scene...");
 
     GameObject* houseModel = LoadFBXAsGameObject(housePath);
 
@@ -50,10 +55,15 @@ bool FileSystem::Start()
 
         GameObject* root = Application::GetInstance().scene->GetRoot();
         root->AddChild(houseModel);
-        std::cout << "FBX loaded" << std::endl;
+        LOG_DEBUG("FBX loaded from: %s", housePath.c_str());
+        LOG_CONSOLE("Default model loaded: %s", housePath.c_str());
+
     }
     else
     {
+        LOG_CONSOLE("WARNING: Could't load default model");
+        LOG_DEBUG("Failed to load default FBX, creating fallback geometry");
+
         GameObject* pyramidObject = new GameObject("Pyramid");
         ComponentMesh* meshComp = static_cast<ComponentMesh*>(pyramidObject->CreateComponent(ComponentType::MESH));
         Mesh pyramidMesh = Primitives::CreatePyramid();
@@ -62,7 +72,8 @@ bool FileSystem::Start()
         GameObject* root = Application::GetInstance().scene->GetRoot();
         root->AddChild(pyramidObject);
 
-        std::cerr << "Failed to load FBX. Use drag & drop." << std::endl;
+        LOG_DEBUG("Failed to load default FBX, using fallback pyramid. Use drag & drop");
+        LOG_CONSOLE("Using fallback geometry");
     }
 
     return true;
@@ -78,23 +89,30 @@ bool FileSystem::Update()
 
         if (fileType == DROPPED_FBX)
         {
+            LOG_DEBUG("Dropped FBX file detected: %s", filePath.c_str());
+            LOG_CONSOLE("Loading dropped model...");
+
             GameObject* loadedModel = LoadFBXAsGameObject(filePath);
             if (loadedModel != nullptr)
             {
                 GameObject* root = Application::GetInstance().scene->GetRoot();
                 root->AddChild(loadedModel);
 
-                std::cout << "Model loaded" << std::endl;
-                std::cout << "   Root GameObject: " << loadedModel->GetName() << std::endl;
-                std::cout << "   Children: " << loadedModel->GetChildren().size() << std::endl;
+                LOG_DEBUG("Model loaded successfully");
+                LOG_DEBUG("   Root GameObject: %s", loadedModel->GetName().c_str());
+                LOG_DEBUG("   Children: %d", loadedModel->GetChildren().size());
+                LOG_CONSOLE("Model loaded successfully: %s", loadedModel->GetName().c_str());
             }
             else
             {
-                std::cerr << "Failed to load FBX" << std::endl;
+                LOG_DEBUG("ERROR: Failed to load dropped FBX file");
+                LOG_CONSOLE("Failed to load model");
             }
         }
         else if (fileType == DROPPED_TEXTURE)
         {
+            LOG_DEBUG("Dropped texture file detected: %s", filePath.c_str());
+            LOG_CONSOLE("Loading texture...");
             Application::GetInstance().renderer->LoadTexture(filePath);
         }
     }
@@ -105,28 +123,35 @@ bool FileSystem::Update()
 bool FileSystem::CleanUp()
 {
     aiDetachAllLogStreams();
+    LOG_CONSOLE("FileSystem cleaned up");
     return true;
 }
 
 GameObject* FileSystem::LoadFBXAsGameObject(const std::string& file_path)
 {
-    LOG("Loading FBX as GameObject: %s", file_path.c_str());
+    LOG_DEBUG("=== Loading FBX with ASSIMP ===");
+    LOG_DEBUG("File: %s", file_path.c_str());
+    LOG_CONSOLE("Loading model with ASSIMP...");
 
-    unsigned int importFlags =
-        aiProcessPreset_TargetRealtime_MaxQuality |
-        aiProcess_ConvertToLeftHanded;
+    unsigned int importFlags = aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_ConvertToLeftHanded;
+
+    LOG_DEBUG("ASSIMP import flags: TargetRealtime_MaxQuality | ConvertToLeftHanded");
 
     const aiScene* scene = aiImportFile(file_path.c_str(), importFlags);
 
     if (scene == nullptr)
     {
-        LOG("Corrupt archive: %s", aiGetErrorString());
+        LOG_DEBUG("ERROR: ASSIMP failed to load file");
+        LOG_DEBUG("ASSIMP Error: %s", aiGetErrorString());
+        LOG_CONSOLE("ERROR: Failed to load model - %s", aiGetErrorString());
         return nullptr;
     }
 
     if (!scene->HasMeshes())
     {
-        LOG("No meshes in scene");
+        LOG_DEBUG("ERROR: No meshes found in scene");
+        LOG_CONSOLE("ERROR: No geometry found in model");
+
         aiReleaseImport(scene);
         return nullptr;
     }
@@ -134,16 +159,20 @@ GameObject* FileSystem::LoadFBXAsGameObject(const std::string& file_path)
     // Extraer directorio del archivo para texturas
     std::string directory = file_path.substr(0, file_path.find_last_of("/\\"));
 
-    std::cout << "==== FBX loaded ====" << std::endl;
-    std::cout << "  Meshes: " << scene->mNumMeshes << std::endl;
-    std::cout << "  Materials: " << scene->mNumMaterials << std::endl;
-    std::cout << "  Nodes: " << CountNodes(scene->mRootNode) << std::endl;
+    LOG_DEBUG("=== ASSIMP Scene Information ===");
+    LOG_DEBUG("  Meshes: %d", scene->mNumMeshes);
+    LOG_DEBUG("  Materials: %d", scene->mNumMaterials);
+    LOG_DEBUG("  Nodes: %d", CountNodes(scene->mRootNode));
+    LOG_CONSOLE("ASSIMP: Found %d meshes, %d materials, %d nodes", scene->mNumMeshes, scene->mNumMaterials, CountNodes(scene->mRootNode));
 
     GameObject* rootObject = ProcessNode(scene->mRootNode, scene, directory);
 
     aiReleaseImport(scene);
 
-    LOG("GameObject created");
+    LOG_DEBUG("=== FBX Loading Complete ===");
+    LOG_DEBUG("GameObject hierarchy created successfully");
+    LOG_CONSOLE("Model loaded successfully");
+
     return rootObject;
 }
 
@@ -166,7 +195,7 @@ GameObject* FileSystem::ProcessNode(aiNode* node, const aiScene* scene, const st
 
     GameObject* gameObject = new GameObject(nodeName);
 
-    LOG("Processing node: %s", nodeName.c_str());
+    LOG_DEBUG("Processing node: %s", nodeName.c_str());
 
     // ======================================================== 2 ====================================================
     // Get Transform component
@@ -195,7 +224,7 @@ GameObject* FileSystem::ProcessNode(aiNode* node, const aiScene* scene, const st
         unsigned int meshIndex = node->mMeshes[i];
         aiMesh* aiMesh = scene->mMeshes[meshIndex];
 
-        LOG("  Processing mesh %d: %s", i, aiMesh->mName.C_Str());
+        LOG_DEBUG("  Processing mesh %d: %s", i, aiMesh->mName.C_Str());
 
         // Procesar mesh con nueva estructura
         Mesh mesh = ProcessMesh(aiMesh, scene);
@@ -215,7 +244,7 @@ GameObject* FileSystem::ProcessNode(aiNode* node, const aiScene* scene, const st
                 aiString texturePath;
                 material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
 
-                LOG("    Material has texture: %s", texturePath.C_Str());
+                LOG_DEBUG("    Material has texture: %s", texturePath.C_Str());
 
                 ComponentMaterial* matComponent = static_cast<ComponentMaterial*>(gameObject->GetComponent(ComponentType::MATERIAL));
 
@@ -313,8 +342,8 @@ Mesh FileSystem::ProcessMesh(aiMesh* aiMesh, const aiScene* scene)
         }
     }
 
-    LOG("    Vertices: %d, Indices: %d", mesh.vertices.size(), mesh.indices.size());
-
+    LOG_DEBUG("      Mesh processed: Vertices: %d, Indices: %d, Triangles: %d", mesh.vertices.size(), mesh.indices.size(), mesh.indices.size() / 3);
+    LOG_CONSOLE("  Mesh processed: %d vertices, %d triangles", mesh.vertices.size(), mesh.indices.size() / 3);
     return mesh;
 }
 
