@@ -126,7 +126,7 @@ void Grid::Draw()
 
 bool Grid::CleanUp()
 {
-    LOG("Cleaning up Grid");
+    LOG_DEBUG("Cleaning up Grid");
 
     if (VBO != 0)
     {

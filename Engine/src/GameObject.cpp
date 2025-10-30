@@ -24,7 +24,7 @@ Component* GameObject::CreateComponent(ComponentType type) {
     switch (type) {
     case ComponentType::TRANSFORM:
         if (GetComponent(ComponentType::TRANSFORM) != nullptr) {
-            LOG("GameObject has a transform");
+            LOG_DEBUG("GameObject '%s' has a Transform", name.c_str());
             return GetComponent(ComponentType::TRANSFORM);
         }
         newComponent = new Transform(this);
@@ -36,14 +36,15 @@ Component* GameObject::CreateComponent(ComponentType type) {
 
     case ComponentType::MATERIAL:
         if (GetComponent(ComponentType::MATERIAL) != nullptr) {
-            LOG("GameObject has a material ");
+            LOG_DEBUG("GameObject '%s' has a Material", name.c_str());
             return GetComponent(ComponentType::MATERIAL);
         }
         newComponent = new ComponentMaterial(this);
         break;
 
     default:
-        LOG("Unknown component");
+        LOG_DEBUG("ERROR: Unknown component type requested for GameObject '%s'", name.c_str());
+        LOG_CONSOLE("Failed to create component");
         return nullptr;
     }
 

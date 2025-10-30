@@ -26,9 +26,10 @@ bool ModuleScene::Awake()
 
 bool ModuleScene::Start()
 {
-    LOG("Initializing Scene");
+    LOG_DEBUG("Initializing Scene");
     renderer->DrawScene();
     root = new GameObject("Root");
+    LOG_CONSOLE("Scene ready");
 
     return true;
 }
@@ -49,7 +50,7 @@ bool ModuleScene::PostUpdate()
 
 bool ModuleScene::CleanUp()
 {
-    LOG("Cleaning up Scene");
+    LOG_DEBUG("Cleaning up Scene");
 
     if (root)
     {

@@ -4,6 +4,7 @@
 #include <IL/il.h>
 #include <IL/ilu.h>
 #include <fstream>
+#include "Log.h"
 
 #define CHECKERS_WIDTH 64
 #define CHECKERS_HEIGHT 64
@@ -20,6 +21,7 @@ Texture::~Texture()
 
 void Texture::CreateCheckerboard()
 {
+    LOG_DEBUG("Creating checkerboard pattern texture");
     // patron checkerboard
     static GLubyte checkerImage[CHECKERS_HEIGHT][CHECKERS_WIDTH][4];
 
@@ -51,6 +53,9 @@ void Texture::CreateCheckerboard()
     width = CHECKERS_WIDTH;
     height = CHECKERS_HEIGHT;
     nrChannels = 4;
+
+    LOG_DEBUG("Checkerboard texture created - Size: %dx%d, ID: %d", width, height, textureID);
+    LOG_CONSOLE("Default checkerboard texture ready");
 }
 
 void Texture::InitDevIL()
@@ -58,10 +63,18 @@ void Texture::InitDevIL()
     static bool initialized = false;
     if (!initialized)
     {
+        LOG_DEBUG("Initializing DevIL library");
+
         ilInit();
         iluInit();
         initialized = true;
-        std::cout << "DevIL initialized" << std::endl;
+
+        ILint devilVersion = ilGetInteger(IL_VERSION_NUM);
+        int devilMajor = devilVersion / 100;
+        int devilMinor = (devilVersion / 10) % 10;
+        int devilPatch = devilVersion % 10;
+        LOG_DEBUG("DevIL initialized successfully - Version: %d.%d.%d", devilMajor, devilMinor, devilPatch);
+        LOG_CONSOLE("DevIL library initialized - Version: %d.%d.%d", devilMajor, devilMinor, devilPatch);
     }
 }
 
@@ -134,12 +147,14 @@ bool Texture::LoadFromFile(const std::string& path, bool flipVertically)
     // Normalize the path (convert backslashes to forward slashes)
     fullPath = NormalizePath(fullPath);
 
-    std::cout << "Trying to load texture with DevIL: " << fullPath << std::endl;
+    LOG_DEBUG("=== DevIL Texture Loading ===");
+    LOG_DEBUG("Path: %s", fullPath.c_str());
 
     // Verify that the file exists before attempting to load it
     if (!FileExists(fullPath))
     {
-        std::cerr << "ERROR: File does not exist: " << fullPath << std::endl;
+        LOG_DEBUG("ERROR: Texture file does not exist");
+        LOG_CONSOLE("ERROR: Texture file not found");
         return false;
     }
 
@@ -152,8 +167,9 @@ bool Texture::LoadFromFile(const std::string& path, bool flipVertically)
     if (!ilLoadImage(fullPath.c_str()))
     {
         ILenum error = ilGetError();
-        std::cerr << "ERROR: Failed to load texture with DevIL: " << fullPath << std::endl;
-        std::cerr << "DevIL Error: " << iluErrorString(error) << std::endl;
+        LOG_DEBUG("ERROR: DevIL failed to load image");
+        LOG_DEBUG("DevIL Error: %s", iluErrorString(error));
+        LOG_CONSOLE("ERROR: DevIL failed to load texture");
         ilDeleteImages(1, &imageID);
         return false;
     }
@@ -161,7 +177,8 @@ bool Texture::LoadFromFile(const std::string& path, bool flipVertically)
     // Convert the image to RGBA (standard format)
     if (!ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE))
     {
-        std::cerr << "ERROR: Failed to convert image to RGBA" << std::endl;
+        LOG_DEBUG("ERROR: Failed to convert image to RGBA format");
+        LOG_CONSOLE("ERROR: Failed to convert texture format");
         ilDeleteImages(1, &imageID);
         return false;
     }
@@ -172,12 +189,22 @@ bool Texture::LoadFromFile(const std::string& path, bool flipVertically)
     nrChannels = ilGetInteger(IL_IMAGE_CHANNELS);
     ILubyte* data = ilGetData();
 
+    LOG_DEBUG("Image properties:");
+    LOG_DEBUG("  Width: %d pixels", width);
+    LOG_DEBUG("  Height: %d pixels", height);
+    LOG_DEBUG("  Channels: %d", nrChannels);
+    LOG_DEBUG("  Size: %.2f KB", (width * height * 4) / 1024.0f);
+    LOG_CONSOLE("DevIL: Texture loaded - %dx%d, %d channels, %.2f KB", width, height, nrChannels, (width * height * 4) / 1024.0f);
+
     if (!data)
     {
-        std::cerr << "ERROR: Failed to get image data from DevIL" << std::endl;
+        LOG_DEBUG("ERROR: Failed to get image data from DevIL");
+        LOG_CONSOLE("ERROR: Could not extract texture data");
         ilDeleteImages(1, &imageID);
         return false;
     }
+
+    LOG_DEBUG("Creating OpenGL texture object");
 
     // Generate and configure the texture in OpenGL
     glGenTextures(1, &textureID);
@@ -196,11 +223,9 @@ bool Texture::LoadFromFile(const std::string& path, bool flipVertically)
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    ilDeleteImages(1, &imageID);
+    LOG_DEBUG("OpenGL texture created - ID: %d", textureID);
 
-    std::cout << "Texture loaded successfully with DevIL: " << fullPath << std::endl;
-    std::cout << "  Size: " << width << "x" << height << std::endl;
-    std::cout << "  Channels: " << nrChannels << std::endl;
+    ilDeleteImages(1, &imageID);
 
     return true;
 }

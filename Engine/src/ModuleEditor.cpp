@@ -24,17 +24,21 @@ ModuleEditor::~ModuleEditor()
 
 bool ModuleEditor::Start()
 {
-    LOG("Initializing Editor");
+    LOG_DEBUG("Initializing Editor");
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
+    //io.IniFilename = NULL;  // for testing
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
 
     ImGui_ImplSDL3_InitForOpenGL(Application::GetInstance().window->GetWindow(), Application::GetInstance().renderContext->GetContext());
     ImGui_ImplOpenGL3_Init();
 
     ImGui::StyleColorsDark();
+
+    LOG_CONSOLE("Editor initialized");
+
 
     return true;
 }
@@ -50,14 +54,44 @@ bool ModuleEditor::PreUpdate()
 
 bool ModuleEditor::Update()
 {
+    int windowWidth, windowHeight;
+    Application::GetInstance().window->GetWindowSize(windowWidth, windowHeight);
 
-    DrawConsoleWindow();
+    bool windowResized = (windowWidth != lastWindowWidth || windowHeight != lastWindowHeight);
+    lastWindowWidth = windowWidth;
+    lastWindowHeight = windowHeight;
 
+    float halfHeight = (windowHeight - 20) * 0.5f;
+
+    ImGuiCond condition = windowResized ? ImGuiCond_Always : ImGuiCond_FirstUseEver;
+
+    // Up left
+    ImGui::SetNextWindowPos(ImVec2(0, 20), condition);
+    ImGui::SetNextWindowSize(ImVec2(windowWidth * 0.30f, halfHeight + (halfHeight * 0.5f)), condition);
     DrawConfigurationWindow();
 
+	// Down left
+    ImGui::SetNextWindowPos(ImVec2(0, 20 + halfHeight + (halfHeight * 0.5f)), condition);
+    ImGui::SetNextWindowSize(ImVec2(windowWidth*0.75f, halfHeight * 0.5f), condition);
+    DrawConsoleWindow();
+
+	// Down right
+    ImGui::SetNextWindowPos(ImVec2(windowWidth * 0.75f, 20 + halfHeight), condition);
+    ImGui::SetNextWindowSize(ImVec2(windowWidth * 0.25f, halfHeight), condition);
     DrawHierarchyWindow();
 
+	// Up right
+    ImGui::SetNextWindowPos(ImVec2(windowWidth * 0.75f, 20), condition);
+    ImGui::SetNextWindowSize(ImVec2(windowWidth * 0.25f, halfHeight), condition);
     DrawInspectorWindow();
+
+    //DrawConfigurationWindow();
+
+    //DrawConsoleWindow();
+
+    //DrawHierarchyWindow();
+
+    //DrawInspectorWindow();
 
     return true;
 }
@@ -74,7 +108,7 @@ bool ModuleEditor::PostUpdate()
 
 bool ModuleEditor::CleanUp()
 {
-    LOG("Cleaning up Editor");
+    LOG_DEBUG("Cleaning up Editor");
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
@@ -312,6 +346,99 @@ void ModuleEditor::DrawInspectorWindow()
 void ModuleEditor::DrawConsoleWindow()
 {
     ImGui::Begin("Console", &showConsole);
+
+    if (ImGui::Button("Clear"))
+    {
+        ConsoleLog::GetInstance().Clear();
+    }
+
+    ImGui::SameLine();
+    ImGui::Checkbox("Library Info", &showLibraryInfo);
+    ImGui::SameLine();
+    ImGui::Checkbox("Errors", &showErrors);
+    ImGui::SameLine();
+    ImGui::Checkbox("Warnings", &showWarnings);
+    ImGui::SameLine();
+    ImGui::Checkbox("Loading", &showLoading);
+    ImGui::SameLine();
+    ImGui::Checkbox("Success", &showSuccess);
+    ImGui::SameLine();
+    ImGui::Checkbox("Info", &showInfo);
+    ImGui::SameLine();
+    ImGui::Checkbox("Auto-scroll", &autoScroll);
+
+	ImGui::Separator();
+
+    ImVec2 availableSpace = ImGui::GetContentRegionAvail();
+
+    ImGui::BeginChild("Scrolling", availableSpace, true, ImGuiWindowFlags_HorizontalScrollbar);
+
+	const std::vector<std::string>& logs = ConsoleLog::GetInstance().GetLogs();
+
+    for (const auto& log : logs)
+    {
+        ImVec4 color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // White
+        bool isError = false;
+        bool isWarning = false;
+        bool isInfo = false;
+        bool isSuccess = false;
+		bool isLoading = false;
+        bool isLibraryInfo = false;
+
+        if (log.find("DevIL") != std::string::npos || log.find("SDL3") != std::string::npos || log.find("OpenGL") != std::string::npos || log.find("ASSIMP") != std::string::npos || log.find("Mesh processed") != std::string::npos)
+        {
+            color = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+            isLibraryInfo = true;
+        }
+        else if (log.find("ERROR") != std::string::npos || log.find("Failed") != std::string::npos)
+        {
+            color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f); // Red
+            isError = true;
+        }
+        else if (log.find("WARNING") != std::string::npos || log.find("Corrupt") != std::string::npos)
+        {
+            color = ImVec4(1.0f, 1.0f, 0.0f, 1.0f); // Yellow
+            isWarning = true;
+        }
+        else if (log.find("Loading") != std::string::npos || log.find("Initializing") != std::string::npos)
+        {
+            color = ImVec4(1.0f, 0.7f, 0.3f, 1.0f); // Orange
+            isLoading = true;
+        }
+        else if (log.find("ready") != std::string::npos || log.find("loaded") != std::string::npos || log.find("initialized") != std::string::npos)
+        {
+            color = ImVec4(0.4f, 1.0f, 0.4f, 1.0f); // Green
+            isSuccess = true;
+        }
+        else isInfo = true;
+
+        if (isLibraryInfo)
+        {
+            if (!showLibraryInfo)
+                continue;
+        }
+        else if ((isError && !showErrors) || (isWarning && !showWarnings) || (isSuccess && !showSuccess) || (isInfo && !showInfo) || (isLoading && !showLoading))
+        {
+            continue; 
+        }
+
+        ImGui::PushStyleColor(ImGuiCol_Text, color);
+        ImGui::TextWrapped("%s", log.c_str());
+        ImGui::PopStyleColor();
+    }
+
+    if (autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+    {
+        ImGui::SetScrollHereY(1.0f);
+    }
+
+    if (scrollToBottom)
+    {
+        ImGui::SetScrollHereY(1.0f);
+        scrollToBottom = false;
+    }
+
+    ImGui::EndChild();
 
     ImGui::End();
 }

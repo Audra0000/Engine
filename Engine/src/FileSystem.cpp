@@ -22,6 +22,10 @@ bool FileSystem::Awake()
 
 bool FileSystem::Start()
 {
+
+    LOG_DEBUG("Initializing FileSystem module");
+    LOG_CONSOLE("FileSystem initialized");
+
     // Get executable directory and move to Assets folder
     char buffer[MAX_PATH];
     GetModuleFileNameA(NULL, buffer, MAX_PATH);
@@ -38,7 +42,8 @@ bool FileSystem::Start()
 
     std::string housePath = rootDir + "\\Assets\\BakerHouse.fbx";
 
-    std::cout << "Loading: " << housePath << std::endl;
+    LOG_DEBUG("Attempting to load default model: %s", housePath.c_str());
+    LOG_CONSOLE("Loading default scene...");
 
     GameObject* houseModel = LoadFBXAsGameObject(housePath);
 
@@ -46,11 +51,15 @@ bool FileSystem::Start()
     {
         GameObject* root = Application::GetInstance().scene->GetRoot();
         root->AddChild(houseModel);
-        std::cout << "FBX loaded successfully" << std::endl;
+        LOG_DEBUG("FBX loaded from: %s", housePath.c_str());
+        LOG_CONSOLE("Default model loaded: %s", housePath.c_str());
+
     }
     else
     {
-        // Fallback: create a pyramid primitive if FBX fails
+        LOG_CONSOLE("WARNING: Could't load default model");
+        LOG_DEBUG("Failed to load default FBX, creating fallback geometry");
+
         GameObject* pyramidObject = new GameObject("Pyramid");
         ComponentMesh* meshComp = static_cast<ComponentMesh*>(pyramidObject->CreateComponent(ComponentType::MESH));
         Mesh pyramidMesh = Primitives::CreatePyramid();
@@ -59,7 +68,8 @@ bool FileSystem::Start()
         GameObject* root = Application::GetInstance().scene->GetRoot();
         root->AddChild(pyramidObject);
 
-        std::cerr << "Failed to load FBX." << std::endl;
+        LOG_DEBUG("Failed to load default FBX, using fallback pyramid. Use drag & drop");
+        LOG_CONSOLE("Using fallback geometry");
     }
 
     return true;
@@ -75,22 +85,29 @@ bool FileSystem::Update()
 
         if (fileType == DROPPED_FBX)
         {
+            LOG_DEBUG("Dropped FBX file detected: %s", filePath.c_str());
+            LOG_CONSOLE("Loading dropped model...");
+
             GameObject* loadedModel = LoadFBXAsGameObject(filePath);
             if (loadedModel != nullptr)
             {
                 GameObject* root = Application::GetInstance().scene->GetRoot();
                 root->AddChild(loadedModel);
 
-                LOG( "Model loaded: %s", loadedModel->GetName().c_str());
-                LOG( "Children count: %zu", loadedModel->GetChildren().size());
+                LOG_DEBUG("Model loaded successfully");
+                LOG_DEBUG("   Root GameObject: %s", loadedModel->GetName().c_str());
+                LOG_DEBUG("   Children: %d", loadedModel->GetChildren().size());
+                LOG_CONSOLE("Model loaded successfully: %s", loadedModel->GetName().c_str());
             }
             else
             {
-                LOG("✗ Failed to load FBX");
+                LOG_DEBUG("ERROR: Failed to load dropped FBX file");
+                LOG_CONSOLE("Failed to load model");
             }
         }
         else if (fileType == DROPPED_TEXTURE)
         {
+            LOG_DEBUG("Dropped texture file detected: %s", filePath.c_str());
             // Get all selected objects in the editor
             std::vector<GameObject*> selectedObjects =
                 Application::GetInstance().selectionManager->GetSelectedObjects();
@@ -113,7 +130,7 @@ bool FileSystem::Update()
             else
             {
                 // Fallback behavior: load the texture globally if no objects are selected
-                LOG( "No objects selected. Loading texture globally.");
+                LOG_CONSOLE("Loading texture...");
                 Application::GetInstance().renderer->LoadTexture(filePath);
             }
         }
@@ -125,6 +142,7 @@ bool FileSystem::Update()
 bool FileSystem::CleanUp()
 {
     aiDetachAllLogStreams();
+    LOG_CONSOLE("FileSystem cleaned up");
     return true;
 }
 
@@ -177,7 +195,9 @@ bool FileSystem::ApplyTextureToGameObject(GameObject* obj, const std::string& te
 
 GameObject* FileSystem::LoadFBXAsGameObject(const std::string& file_path)
 {
-    LOG("Loading FBX: %s", file_path.c_str());
+    LOG_DEBUG("=== Loading FBX with ASSIMP ===");
+    LOG_DEBUG("File: %s", file_path.c_str());
+    LOG_CONSOLE("Loading model with ASSIMP...");
 
     unsigned int importFlags =
         aiProcess_Triangulate |
@@ -186,27 +206,33 @@ GameObject* FileSystem::LoadFBXAsGameObject(const std::string& file_path)
         aiProcess_JoinIdenticalVertices |
         aiProcess_OptimizeMeshes |
         aiProcess_ValidateDataStructure;
+        
+    LOG_DEBUG("ASSIMP import flags: TargetRealtime_MaxQuality | ConvertToLeftHanded");
 
     const aiScene* scene = aiImportFile(file_path.c_str(), importFlags);
 
     if (scene == nullptr)
     {
-        LOG("Import failed: %s", aiGetErrorString());
+        LOG_DEBUG("ERROR: ASSIMP failed to load file");
+        LOG_DEBUG("ASSIMP Error: %s", aiGetErrorString());
+        LOG_CONSOLE("ERROR: Failed to load model - %s", aiGetErrorString());
         return nullptr;
     }
 
     if (!scene->HasMeshes())
     {
-        LOG("No meshes found in scene");
+        LOG_DEBUG("ERROR: No meshes found in scene");
+        LOG_CONSOLE("ERROR: No geometry found in model");
         aiReleaseImport(scene);
         return nullptr;
     }
 
     std::string directory = file_path.substr(0, file_path.find_last_of("/\\"));
 
-    std::cout << "==== FBX Loaded ====" << std::endl;
-    std::cout << "Meshes: " << scene->mNumMeshes << std::endl;
-    std::cout << "Materials: " << scene->mNumMaterials << std::endl;
+    LOG_DEBUG("=== ASSIMP Scene Information ===");
+    LOG_DEBUG("  Meshes: %d", scene->mNumMeshes);
+    LOG_DEBUG("  Materials: %d", scene->mNumMaterials);
+    LOG_CONSOLE("ASSIMP: Found %d meshes, %d materials", scene->mNumMeshes, scene->mNumMaterials);
 
     GameObject* rootObj = ProcessNode(scene->mRootNode, scene, directory);
 
@@ -216,7 +242,7 @@ GameObject* FileSystem::LoadFBXAsGameObject(const std::string& file_path)
     CalculateBoundingBox(rootObj, minBounds, maxBounds, identity);
 
     glm::vec3 size = maxBounds - minBounds;
-    std::cout << "Dimensions: X=" << size.x << " Y=" << size.y << " Z=" << size.z << std::endl;
+    LOG_DEBUG("Model Dimensions: X=%.2f Y=%.2f Z=%.2f", size.x, size.y, size.z);
 
     std::string fileName = file_path.substr(file_path.find_last_of("/\\") + 1);
     std::transform(fileName.begin(), fileName.end(), fileName.begin(), ::tolower);
@@ -241,20 +267,25 @@ GameObject* FileSystem::LoadFBXAsGameObject(const std::string& file_path)
         Transform* rootTransform = static_cast<Transform*>(rootObj->GetComponent(ComponentType::TRANSFORM));
         if (rootTransform)
         {
-            std::cout << "Applying rotation correction" << std::endl;
+            LOG_DEBUG("Applying rotation correction to root transform");
             glm::quat existing = rootTransform->GetRotationQuat();
             rootTransform->SetRotationQuat(correction * existing);
         }
     }
     else
     {
-        std::cout << "No rotation correction needed" << std::endl;
+        LOG_DEBUG("No rotation correction needed");
     }
 
     // Normalize scale
     NormalizeModelScale(rootObj, 5.0f);
 
     aiReleaseImport(scene);
+
+    LOG_DEBUG("=== FBX Loading Complete ===");
+    LOG_DEBUG("GameObject hierarchy created successfully");
+    LOG_CONSOLE("Model loaded successfully");
+    
     return rootObj;
 }
 
@@ -265,7 +296,7 @@ GameObject* FileSystem::ProcessNode(aiNode* node, const aiScene* scene, const st
 
     GameObject* gameObject = new GameObject(nodeName);
 
-    LOG("Processing node: %s", nodeName.c_str());
+    LOG_DEBUG("Processing node: %s", nodeName.c_str());
 
     Transform* transform = static_cast<Transform*>(gameObject->GetComponent(ComponentType::TRANSFORM));
 
@@ -286,7 +317,7 @@ GameObject* FileSystem::ProcessNode(aiNode* node, const aiScene* scene, const st
         unsigned int meshIndex = node->mMeshes[i];
         aiMesh* aiMesh = scene->mMeshes[meshIndex];
 
-        LOG("Processing mesh %d: %s", i, aiMesh->mName.C_Str());
+        LOG_DEBUG("  Processing mesh %d: %s", i, aiMesh->mName.C_Str());
 
         Mesh mesh = ProcessMesh(aiMesh, scene);
 
@@ -303,7 +334,7 @@ GameObject* FileSystem::ProcessNode(aiNode* node, const aiScene* scene, const st
                 aiString texturePath;
                 material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
 
-                LOG("Material texture: %s", texturePath.C_Str());
+                LOG_DEBUG("    Material has texture: %s", texturePath.C_Str());
 
                 ComponentMaterial* matComponent = static_cast<ComponentMaterial*>(gameObject->GetComponent(ComponentType::MATERIAL));
 
@@ -330,10 +361,10 @@ GameObject* FileSystem::ProcessNode(aiNode* node, const aiScene* scene, const st
                 bool loaded = false;
                 for (const auto& path : searchPaths)
                 {
-                    LOG("Trying texture at: %s", path.c_str());
+                    LOG_DEBUG("      Trying texture at: %s", path.c_str());
                     if (matComponent->LoadTexture(path))
                     {
-                        LOG("Texture loaded successfully from: %s", path.c_str());
+                        LOG_DEBUG("      Texture loaded successfully from: %s", path.c_str());
                         loaded = true;
                         break;
                     }
@@ -341,7 +372,7 @@ GameObject* FileSystem::ProcessNode(aiNode* node, const aiScene* scene, const st
 
                 if (!loaded)
                 {
-                    LOG("Texture '%s' not found, using checkerboard", fileName.c_str());
+                    LOG_DEBUG("      Texture '%s' not found, using checkerboard", fileName.c_str());
                 }
             }
         }
@@ -416,8 +447,8 @@ Mesh FileSystem::ProcessMesh(aiMesh* aiMesh, const aiScene* scene)
         }
     }
 
-    LOG("Vertices: %d, Indices: %d", mesh.vertices.size(), mesh.indices.size());
-
+    LOG_DEBUG("      Mesh processed: Vertices: %d, Indices: %d, Triangles: %d", mesh.vertices.size(), mesh.indices.size(), mesh.indices.size() / 3);
+    LOG_CONSOLE("  Mesh processed: %d vertices, %d triangles", mesh.vertices.size(), mesh.indices.size() / 3);
     return mesh;
 }
 
@@ -443,7 +474,8 @@ void FileSystem::NormalizeModelScale(GameObject* rootObject, float targetSize)
             t->SetScale(currentScale * scale);
         }
 
-        std::cout << "Model normalized: " << maxDimension << " -> scale=" << scale << std::endl;
+        LOG_DEBUG("Model normalized: %.2f -> scale=%.4f", maxDimension, scale);
+        LOG_CONSOLE("Model scaled to fit viewport (scale: %.4f)", scale);
     }
 }
 
@@ -495,15 +527,15 @@ void FileSystem::CalculateBoundingBox(GameObject* obj, glm::vec3& minBounds, glm
 
 glm::quat FileSystem::DetectCorrectionRotation(const aiScene* scene, const glm::vec3& modelSize)
 {
-    std::cout << "\n=== Rotation Detection ===" << std::endl;
-    std::cout << "Model size - X: " << modelSize.x << " Y: " << modelSize.y << " Z: " << modelSize.z << std::endl;
+    LOG_DEBUG("=== Rotation Detection ===");
+    LOG_DEBUG("Model size - X: %.2f Y: %.2f Z: %.2f", modelSize.x, modelSize.y, modelSize.z);
 
     glm::quat correction = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
     // Try reading metadata first
     if (scene && scene->mMetaData)
     {
-        std::cout << "Metadata found" << std::endl;
+        LOG_DEBUG("Metadata found in scene");
 
         int upAxis = 1;
         int upAxisSign = 1;
@@ -511,39 +543,87 @@ glm::quat FileSystem::DetectCorrectionRotation(const aiScene* scene, const glm::
         bool hasUpAxis = scene->mMetaData->Get("UpAxis", upAxis);
         bool hasUpAxisSign = scene->mMetaData->Get("UpAxisSign", upAxisSign);
 
-        std::cout << "UpAxis: " << upAxis << " (found: " << hasUpAxis << ")" << std::endl;
-        std::cout << "UpAxisSign: " << upAxisSign << " (found: " << hasUpAxisSign << ")" << std::endl;
+        LOG_DEBUG("UpAxis: %d (found: %s)", upAxis, hasUpAxis ? "yes" : "no");
+        LOG_DEBUG("UpAxisSign: %d (found: %s)", upAxisSign, hasUpAxisSign ? "yes" : "no");
 
         if (upAxis == 2) // Z-up detected
         {
-            std::cout << ">>> Z-up detected! Applying -90° X rotation" << std::endl;
+            LOG_DEBUG(">>> Z-up detected! Applying -90° X rotation");
+            LOG_CONSOLE("Model orientation corrected (Z-up to Y-up)");
             correction = glm::angleAxis(glm::radians(-90.0f * (float)upAxisSign), glm::vec3(1, 0, 0));
             return correction;
         }
         else if (upAxis == 1) // Y-up (OpenGL)
         {
-            std::cout << ">>> Y-up detected, no correction needed" << std::endl;
+            LOG_DEBUG(">>> Y-up detected, no correction needed");
         }
     }
     else
     {
-        std::cout << "No metadata, using heuristic detection" << std::endl;
+        LOG_DEBUG("No metadata found, using heuristic detection");
     }
 
     float yzRatio = (modelSize.y > 0.0001f) ? (modelSize.z / modelSize.y) : 0.0f;
 
-    std::cout << "YZ Ratio: " << yzRatio << " (threshold: 1.4)" << std::endl;
+    LOG_DEBUG("YZ Ratio: %.2f (threshold: 1.4)", yzRatio);
 
     if (yzRatio > 1.4f)
     {
-        std::cout << ">>> Heuristic: Z dimension dominant, applying -90° X rotation" << std::endl;
+        LOG_DEBUG(">>> Heuristic: Z dimension dominant, applying -90° X rotation");
+        LOG_CONSOLE("Model orientation corrected (heuristic)");
         correction = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1, 0, 0));
     }
     else
     {
-        std::cout << ">>> No correction applied" << std::endl;
+        LOG_DEBUG(">>> No correction applied");
     }
 
-    std::cout << "=======================\n" << std::endl;
+    LOG_DEBUG("======================");
     return correction;
+}
+
+bool FileSystem::ApplyTextureToGameObject(GameObject* obj, const std::string& texturePath)
+{
+    if (!obj || !obj->IsActive())
+        return false;
+
+    bool applied = false;
+
+    // Verificar si el objeto tiene un mesh
+    ComponentMesh* meshComp = static_cast<ComponentMesh*>(obj->GetComponent(ComponentType::MESH));
+
+    if (meshComp && meshComp->IsActive() && meshComp->HasMesh())
+    {
+        // Obtener o crear el componente de material
+        ComponentMaterial* matComp = static_cast<ComponentMaterial*>(
+            obj->GetComponent(ComponentType::MATERIAL));
+
+        if (matComp == nullptr)
+        {
+            matComp = static_cast<ComponentMaterial*>(
+                obj->CreateComponent(ComponentType::MATERIAL));
+        }
+
+        // Cargar la textura
+        if (matComp->LoadTexture(texturePath))
+        {
+            LOG_DEBUG("  ✓ Texture applied to: %s", obj->GetName().c_str());
+            applied = true;
+        }
+        else
+        {
+            LOG_DEBUG("  ✗ Failed to apply texture to: %s", obj->GetName().c_str());
+        }
+    }
+
+    // Aplicar recursivamente a los hijos
+    for (GameObject* child : obj->GetChildren())
+    {
+        if (ApplyTextureToGameObject(child, texturePath))
+        {
+            applied = true;
+        }
+    }
+
+    return applied;
 }
