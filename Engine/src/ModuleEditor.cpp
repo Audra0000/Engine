@@ -1,9 +1,3 @@
-#include "ModuleEditor.h"
-#include "Application.h"
-#include "Log.h"
-#include "GameObject.h"
-#include "SelectionManager.h"
-#include "ModuleScene.h"
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
@@ -14,9 +8,17 @@
 #include <psapi.h>
 #include <gl/GL.h>
 #include <SDL3/SDL_timer.h>
+
+#include "ModuleEditor.h"
+#include "Application.h"
+#include "Log.h"
+#include "GameObject.h"
+#include "SelectionManager.h"
+#include "ModuleScene.h"
 #include "Primitives.h"
 #include "ComponentMesh.h"
 #include "ComponentMaterial.h"
+#include "Transform.h"
 
 
 ModuleEditor::ModuleEditor() : Module()
@@ -74,8 +76,8 @@ bool ModuleEditor::Update()
 
     // Up left
     if (showConfiguration) {
-        ImGui::SetNextWindowPos(ImVec2(0, 20), condition);
-        ImGui::SetNextWindowSize(ImVec2(windowWidth * 0.30f, halfHeight + (halfHeight * 0.5f)), condition);
+        ImGui::SetNextWindowPos(ImVec2(windowWidth * 0.75f, 20 + halfHeight + (halfHeight * 0.25f)), condition);
+        ImGui::SetNextWindowSize(ImVec2(windowWidth * 0.25f, halfHeight * 0.75f), condition);
         DrawConfigurationWindow();
     }
 
@@ -88,15 +90,15 @@ bool ModuleEditor::Update()
 
     // Down right
     if (showHierarchy) {
-        ImGui::SetNextWindowPos(ImVec2(windowWidth * 0.75f, 20 + halfHeight), condition);
-        ImGui::SetNextWindowSize(ImVec2(windowWidth * 0.25f, halfHeight), condition);
+        ImGui::SetNextWindowPos(ImVec2(0, 20), condition);
+        ImGui::SetNextWindowSize(ImVec2(windowWidth * 0.30f, halfHeight + (halfHeight * 0.5f)), condition);
         DrawHierarchyWindow();
     }
 
     // Up right
     if (showInspector) {
         ImGui::SetNextWindowPos(ImVec2(windowWidth * 0.75f, 20), condition);
-        ImGui::SetNextWindowSize(ImVec2(windowWidth * 0.25f, halfHeight), condition);
+        ImGui::SetNextWindowSize(ImVec2(windowWidth * 0.25f, halfHeight + (halfHeight * 0.25f)), condition);
         DrawInspectorWindow();
     }
 
@@ -205,7 +207,7 @@ void ModuleEditor::DrawConfigurationWindow()
     ImGui::Begin("Configuration", &showConfiguration);
 
     // FPS Graph
-    if (ImGui::CollapsingHeader("FPS", ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader("FPS")) 
     {
         DrawFPSGraph();
     }
@@ -213,7 +215,7 @@ void ModuleEditor::DrawConfigurationWindow()
     ImGui::Separator();
 
     // Window
-    if (ImGui::CollapsingHeader("Window", ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader("Window"))
     {
         DrawWindowSettings();
     }
@@ -221,7 +223,7 @@ void ModuleEditor::DrawConfigurationWindow()
     ImGui::Separator();
 
     // Hardware
-    if (ImGui::CollapsingHeader("Hardware", ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader("Hardware"))
     {
         DrawHardwareInfo();
     }
@@ -416,6 +418,183 @@ void ModuleEditor::DrawHierarchyWindow()
 void ModuleEditor::DrawInspectorWindow()
 {
     ImGui::Begin("Inspector", &showInspector);
+
+    SelectionManager* selectionManager = Application::GetInstance().selectionManager;
+
+    if (!selectionManager->HasSelection())
+    {
+        ImGui::TextDisabled("No GameObject selected");
+        ImGui::End();
+        return;
+    }
+
+    GameObject* selectedObject = selectionManager->GetSelectedObject();
+
+    if (selectedObject == nullptr)
+    {
+        ImGui::TextDisabled("Invalid selection");
+        ImGui::End();
+        return;
+    }
+
+    ImGui::Text("GameObject: %s", selectedObject->GetName().c_str());
+    ImGui::Separator();
+
+    // Transforms
+    Transform* transform = static_cast<Transform*>(selectedObject->GetComponent(ComponentType::TRANSFORM));
+
+    if (transform != nullptr)
+    {
+        if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            glm::vec3 position = transform->GetPosition();
+            glm::vec3 rotation = transform->GetRotation();
+            glm::vec3 scale = transform->GetScale();
+
+            ImGui::PushItemWidth(80); 
+            ImGui::BeginDisabled();
+
+            // Position
+            ImGui::Text("Position");
+            ImGui::Text("X"); ImGui::SameLine(20);
+            ImGui::DragFloat("##PosX", &position.x, 0.1f); ImGui::SameLine(120);
+            ImGui::Text("Y"); ImGui::SameLine(130);
+            ImGui::DragFloat("##PosY", &position.y, 0.1f); ImGui::SameLine(230);
+            ImGui::Text("Z"); ImGui::SameLine(240);
+            ImGui::DragFloat("##PosZ", &position.z, 0.1f);
+
+            ImGui::Spacing();
+
+            // Rotation
+            ImGui::Text("Rotation");
+            ImGui::Text("X"); ImGui::SameLine(20);
+            ImGui::DragFloat("##RotX", &rotation.x, 0.1f); ImGui::SameLine(120);
+            ImGui::Text("Y"); ImGui::SameLine(130);
+            ImGui::DragFloat("##RotY", &rotation.y, 0.1f); ImGui::SameLine(230);
+            ImGui::Text("Z"); ImGui::SameLine(240);
+            ImGui::DragFloat("##RotZ", &rotation.z, 0.1f);
+
+            ImGui::Spacing();
+
+            // Scale
+            ImGui::Text("Scale");
+            ImGui::Text("X"); ImGui::SameLine(20);
+            ImGui::DragFloat("##ScaleX", &scale.x, 0.1f); ImGui::SameLine(120);
+            ImGui::Text("Y"); ImGui::SameLine(130);
+            ImGui::DragFloat("##ScaleY", &scale.y, 0.1f); ImGui::SameLine(230);
+            ImGui::Text("Z"); ImGui::SameLine(240);
+            ImGui::DragFloat("##ScaleZ", &scale.z, 0.1f);
+
+            ImGui::EndDisabled();
+            ImGui::PopItemWidth();
+        }
+    }
+    // Mesh
+    ComponentMesh* meshComp = static_cast<ComponentMesh*>(selectedObject->GetComponent(ComponentType::MESH));
+
+    if (meshComp != nullptr && meshComp->HasMesh())
+    {
+        if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            const Mesh& mesh = meshComp->GetMesh();
+
+            // Mesh information
+            ImGui::Text("Vertices: %d", (int)mesh.vertices.size());
+            ImGui::Text("Indices: %d", (int)mesh.indices.size());
+            ImGui::Text("Triangles: %d", (int)mesh.indices.size() / 3);
+
+            ImGui::Separator();
+
+            // Normals visualization
+            ImGui::Text("Normals Visualization:");
+
+            if (ImGui::Checkbox("Show Vertex Normals", &showVertexNormals))
+            {
+                LOG_DEBUG("Vertex normals visualization: %s", showVertexNormals ? "ON" : "OFF");
+            }
+
+            if (ImGui::Checkbox("Show Face Normals", &showFaceNormals))
+            {
+                LOG_DEBUG("Face normals visualization: %s", showFaceNormals ? "ON" : "OFF");
+            }
+        }
+    }
+    ComponentMaterial* materialComp = static_cast<ComponentMaterial*>(selectedObject->GetComponent(ComponentType::MATERIAL));
+
+    if (materialComp != nullptr)
+    {
+        if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+			// Texture information
+            ImGui::Text("Texture Information:");
+
+            std::string texturePath = materialComp->GetTexturePath();
+            if (texturePath.empty() || texturePath == "[Checkerboard Pattern]")
+            {
+                ImGui::Text("Path: Checkerboard");
+            }
+            else
+            {
+                ImGui::Text("Path: %s", texturePath.c_str());
+            }
+
+            ImGui::Text("Size: %d x %d pixels", materialComp->GetTextureWidth(), materialComp->GetTextureHeight());
+
+            ImGui::Separator();
+
+            if (materialComp->HasOriginalTexture())
+            {
+                ImGui::Separator();
+                ImGui::Text("Original Texture:");
+                ImGui::Text("Path: %s", materialComp->GetOriginalTexturePath().c_str());
+            }
+
+            ImGui::Separator();
+
+            ImGui::BeginGroup();
+
+            if (ImGui::Button("Apply Checkerboard"))
+            {
+                materialComp->CreateCheckerboardTexture();
+                LOG_DEBUG("Applied checkerboard texture to: %s", selectedObject->GetName().c_str());
+                LOG_CONSOLE("Checkerboard texture applied to %s", selectedObject->GetName().c_str());
+            }
+
+			if (ImGui::IsItemHovered()) // Helper tooltip
+            {
+                ImGui::SetTooltip("Applies the default black and white checkerboard pattern to this GameObject");
+            }
+
+            if (materialComp->HasOriginalTexture())
+            {
+                ImGui::SameLine();
+
+                if (ImGui::Button("Restore Original"))
+                {
+                    materialComp->RestoreOriginalTexture();
+                    LOG_DEBUG("Restored original texture to: %s", selectedObject->GetName().c_str());
+                    LOG_CONSOLE("Original texture restored to %s", selectedObject->GetName().c_str());
+                }
+
+                if (ImGui::IsItemHovered()) // Helper tooltip
+                {
+                    ImGui::SetTooltip("Restores the original texture that was previously loaded");
+                }
+            }
+
+            ImGui::EndGroup();
+        }
+    }
+    else
+    {
+        if (meshComp != nullptr && meshComp->HasMesh())
+        {
+            if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGui::Text("No material component");
+            }
+        }
+    }
     ImGui::End();
 }
 

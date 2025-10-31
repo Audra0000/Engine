@@ -21,6 +21,8 @@ public:
     bool PostUpdate() override;
     bool CleanUp() override;
 
+    bool ShouldShowVertexNormals() const { return showVertexNormals; }
+    bool ShouldShowFaceNormals() const { return showFaceNormals; }
 private:
 
     bool ShowMenuBar();
@@ -56,15 +58,21 @@ private:
     const int maxFPSHistory = 100;
     float fpsTimer = 0.0f;
 
+	// Windows
     bool showConsole = true;
     bool showConfiguration = true;
     bool showHierarchy = true;
     bool showInspector = true;
     bool showAbout = false;
 
+    int lastWindowWidth = 0;
+    int lastWindowHeight = 0;
+
+	// Configuration
     bool fullscreen = false;
     float brightness = 1.0f;
 
+    // Console
     bool showErrors = true;
     bool showWarnings = true;
     bool showInfo = true;
@@ -73,9 +81,14 @@ private:
     bool showLibraryInfo = true;
     bool autoScroll = true;
     bool scrollToBottom = false;
-    int lastWindowWidth = 0;
-    int lastWindowHeight = 0;
-
+  
+    
+	// Hierarchy
     GameObject* renamingObject = nullptr;
     char renameBuffer[256] = "";
+
+	// Inspector 
+    bool showVertexNormals = false;
+    bool showFaceNormals = false;
+
 };

@@ -10,6 +10,7 @@
 #include "Transform.h"
 #include "ComponentMesh.h"
 #include "ComponentMaterial.h"
+#include "ModuleEditor.h"
 
 Renderer::Renderer()
 {
@@ -43,6 +44,20 @@ bool Renderer::Start()
     {
         LOG_DEBUG("Shader created successfully - Program ID: %d", defaultShader->GetProgramID());
         LOG_CONSOLE("OpenGL shaders compiled successfully");
+    }
+
+    lineShader = make_unique<Shader>();
+
+    if (!lineShader->CreateSimpleColor())
+    {
+        LOG_DEBUG("ERROR: Failed to create line shader");
+        LOG_CONSOLE("ERROR: Failed to compile line shader");
+        return false;
+    }
+    else
+    {
+        LOG_DEBUG("Line shader created successfully - Program ID: %d", lineShader->GetProgramID());
+        LOG_CONSOLE("Line shader compiled successfully");
     }
 
     // Create default CHECKERBOARD texture (para objetos sin material)
@@ -281,6 +296,42 @@ void Renderer::DrawGameObjectRecursive(GameObject* gameObject)
         {
             const Mesh& mesh = meshComp->GetMesh();
             DrawMesh(mesh);
+
+            ModuleEditor* editor = Application::GetInstance().editor.get();
+            SelectionManager* selectionManager = Application::GetInstance().selectionManager;
+
+            if (editor != nullptr && selectionManager != nullptr)
+            {
+                bool shouldDrawNormals = false;
+                if (selectionMgr->IsSelected(gameObject))
+                {
+                    shouldDrawNormals = true;
+                }
+                else
+                {
+                    GameObject* parent = gameObject->GetParent();
+                    while (parent != nullptr)
+                    {
+                        if (selectionMgr->IsSelected(parent))
+                        {
+                            shouldDrawNormals = true;
+                            break;
+                        }
+                        parent = parent->GetParent();
+                    }
+                }
+                if (shouldDrawNormals)
+                {
+                    if (editor->ShouldShowVertexNormals())
+                    {
+                        DrawVertexNormals(mesh, modelMatrix);
+                    }
+                    if (editor->ShouldShowFaceNormals())
+                    {
+                        DrawFaceNormals(mesh, modelMatrix);
+                    }
+                }
+            }
         }
     }
 
@@ -300,4 +351,136 @@ void Renderer::DrawGameObjectRecursive(GameObject* gameObject)
     {
         DrawGameObjectRecursive(child);
     }
+}
+
+
+void Renderer::DrawVertexNormals(const Mesh& mesh, const glm::mat4& modelMatrix)
+{
+    if (!mesh.IsValid() || mesh.vertices.empty())
+        return;
+
+	std::vector<float> lineVertices; // Store line vertex positions
+	float normalLength = 0.2f; // <== We can change the length with this ==>
+
+    for (const auto& vertex : mesh.vertices)
+    {
+        glm::vec4 worldPos = modelMatrix * glm::vec4(vertex.position, 1.0f);
+
+		// Transform normal to world space
+        glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+        glm::vec3 worldNormal = glm::normalize(normalMatrix * vertex.normal);
+
+		// End point of the normal line
+        glm::vec3 endPoint = glm::vec3(worldPos) + worldNormal * normalLength;
+
+        // Start point
+        lineVertices.push_back(worldPos.x);
+        lineVertices.push_back(worldPos.y);
+        lineVertices.push_back(worldPos.z);
+
+        // End point
+        lineVertices.push_back(endPoint.x);
+        lineVertices.push_back(endPoint.y);
+        lineVertices.push_back(endPoint.z);
+    }
+
+    GLuint lineVAO, lineVBO;
+    glGenVertexArrays(1, &lineVAO);
+    glGenBuffers(1, &lineVBO);
+
+    glBindVertexArray(lineVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, lineVBO);
+    glBufferData(GL_ARRAY_BUFFER, lineVertices.size() * sizeof(float), lineVertices.data(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+
+    lineShader->Use();
+    GLuint shaderProgram = lineShader->GetProgramID();
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(camera->GetProjectionMatrix()));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f))); 
+
+	lineShader->SetVec3("color", glm::vec3(0.0f, 0.5f, 1.0f)); // Can be changed to whatever color
+
+    glDrawArrays(GL_LINES, 0, lineVertices.size() / 3);
+
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &lineVBO);
+    glDeleteVertexArrays(1, &lineVAO);
+
+    defaultShader->Use();
+}
+
+void Renderer::DrawFaceNormals(const Mesh& mesh, const glm::mat4& modelMatrix)
+{
+    if (!mesh.IsValid() || mesh.vertices.empty() || mesh.indices.empty())
+        return;
+
+    std::vector<float> lineVertices; // Store line vertex positions
+    float normalLength = 0.3f;  // <== We can change the length with this ==>
+
+    for (size_t i = 0; i < mesh.indices.size(); i += 3)
+    {
+		// Get the vertices 
+        const Vertex& v0 = mesh.vertices[mesh.indices[i]];
+        const Vertex& v1 = mesh.vertices[mesh.indices[i + 1]];
+        const Vertex& v2 = mesh.vertices[mesh.indices[i + 2]];
+
+		// Transform normal to world space
+        glm::vec4 worldPos0 = modelMatrix * glm::vec4(v0.position, 1.0f);
+        glm::vec4 worldPos1 = modelMatrix * glm::vec4(v1.position, 1.0f);
+        glm::vec4 worldPos2 = modelMatrix * glm::vec4(v2.position, 1.0f);
+
+		// Calculate the center of the face
+        glm::vec3 faceCenter = (glm::vec3(worldPos0) + glm::vec3(worldPos1) + glm::vec3(worldPos2)) / 3.0f;
+
+        glm::vec3 edge1 = glm::vec3(worldPos1) - glm::vec3(worldPos0);
+        glm::vec3 edge2 = glm::vec3(worldPos2) - glm::vec3(worldPos0);
+        glm::vec3 faceNormal = glm::normalize(glm::cross(edge1, edge2));
+
+        // End point of the normal line
+        glm::vec3 endPoint = faceCenter + faceNormal * normalLength;
+
+        // Start point
+        lineVertices.push_back(faceCenter.x);
+        lineVertices.push_back(faceCenter.y);
+        lineVertices.push_back(faceCenter.z);
+
+        // End point
+        lineVertices.push_back(endPoint.x);
+        lineVertices.push_back(endPoint.y);
+        lineVertices.push_back(endPoint.z);
+    }
+
+    GLuint lineVAO, lineVBO;
+    glGenVertexArrays(1, &lineVAO);
+    glGenBuffers(1, &lineVBO);
+
+    glBindVertexArray(lineVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, lineVBO);
+    glBufferData(GL_ARRAY_BUFFER, lineVertices.size() * sizeof(float), lineVertices.data(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+
+    lineShader->Use();
+    GLuint shaderProgram = lineShader->GetProgramID();
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(camera->GetProjectionMatrix()));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f))); 
+
+	lineShader->SetVec3("color", glm::vec3(0.0f, 1.0f, 0.5f)); // Can be changed to whatever color
+
+    glDrawArrays(GL_LINES, 0, lineVertices.size() / 3);
+
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &lineVBO);
+    glDeleteVertexArrays(1, &lineVAO);
+
+    defaultShader->Use();
 }

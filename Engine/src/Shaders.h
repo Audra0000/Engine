@@ -10,6 +10,7 @@ public:
     ~Shader();
 
     bool Create();
+    bool CreateSimpleColor();
     void Use() const;
     void Delete();
 

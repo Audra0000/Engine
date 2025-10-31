@@ -28,6 +28,8 @@ public:
     void DrawScene();
     void DrawGameObject(GameObject* gameObject);
 
+    void DrawVertexNormals(const Mesh& mesh, const glm::mat4& modelMatrix);
+    void DrawFaceNormals(const Mesh& mesh, const glm::mat4& modelMatrix);
 
     Shader* GetDefaultShader() const { return defaultShader.get(); }
     Camera* GetCamera() { return camera.get(); }
@@ -37,6 +39,8 @@ private:
     void DrawGameObjectRecursive(GameObject* gameObject);
 
     std::unique_ptr<Shader> defaultShader;
+    std::unique_ptr<Shader> lineShader;
+
     std::unique_ptr<Texture> defaultTexture;
     Mesh sphere, cube, pyramid, cylinder, plane;
     unique_ptr<Camera> camera;

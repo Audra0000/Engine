@@ -7,7 +7,9 @@
 ComponentMaterial::ComponentMaterial(GameObject* owner)
     : Component(owner, ComponentType::MATERIAL),
     texture(nullptr),
-    texturePath("")
+    texturePath(""),
+    originalTexturePath(""),
+    hasOriginalTexture(false)
 {
     CreateCheckerboardTexture();
 }
@@ -37,6 +39,9 @@ bool ComponentMaterial::LoadTexture(const std::string& path)
     {
         texture = std::move(newTexture);
         texturePath = path;
+
+        originalTexturePath = path;
+        hasOriginalTexture = true;
 
         LOG_DEBUG("ComponentMaterial: Texture loaded");
         LOG_CONSOLE("Texture loaded: %s", path.c_str());
@@ -96,4 +101,33 @@ int ComponentMaterial::GetTextureHeight() const
         return texture->GetHeight();
     }
     return 0;
+}
+
+void ComponentMaterial::RestoreOriginalTexture()
+{
+    if (hasOriginalTexture && !originalTexturePath.empty())
+    {
+        auto newTexture = std::make_unique<Texture>();
+
+        if (newTexture->LoadFromFile(originalTexturePath))
+        {
+			texture = std::move(newTexture); // Move is used here to transfer ownership
+            texturePath = originalTexturePath;
+
+            LOG_DEBUG("ComponentMaterial: Original texture restored");
+            LOG_CONSOLE("Original texture restored: %s", originalTexturePath.c_str());
+        }
+        else
+        {
+            LOG_DEBUG("ComponentMaterial: Failed to restore original texture");
+            LOG_CONSOLE("Failed to restore original texture");
+
+            CreateCheckerboardTexture();
+        }
+    }
+    else
+    {
+        LOG_DEBUG("ComponentMaterial: No original texture to restore");
+        LOG_CONSOLE("No original texture available to restore");
+    }
 }
