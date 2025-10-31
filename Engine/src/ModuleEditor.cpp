@@ -17,7 +17,7 @@
 #include "Primitives.h"
 #include "ComponentMesh.h"
 #include "ComponentMaterial.h"
-
+#include "Transform.h"
 
 ModuleEditor::ModuleEditor() : Module()
 {
@@ -416,6 +416,58 @@ void ModuleEditor::DrawHierarchyWindow()
 void ModuleEditor::DrawInspectorWindow()
 {
     ImGui::Begin("Inspector", &showInspector);
+
+    SelectionManager* selectionManager = Application::GetInstance().selectionManager;
+
+    if (!selectionManager->HasSelection()) {
+        ImGui::TextDisabled("No selected gameObject");
+        ImGui::End();
+        return;
+    }
+
+    GameObject* selectedObject = selectionManager->GetSelectedObject();
+
+    if (selectedObject == nullptr) {
+        ImGui::TextDisabled("No gameobjects created");
+        ImGui::End();
+        return;
+    }
+
+    ImGui::Text("GameObject: %s", selectedObject->GetName().c_str());
+
+    ImGui::Separator();
+
+    Transform* transform = static_cast<Transform*>(selectedObject->GetComponent(ComponentType::TRANSFORM));
+
+    if (transform == nullptr) {
+        ImGui::TextDisabled("Gameobject doesnt have transforms");
+        ImGui::End();
+        return;
+    }
+    else {
+        ImGui::CollapsingHeader("Tranforms", ImGuiTreeNodeFlags_DefaultOpen);
+        glm::vec3 position = transform->GetPosition();
+        ImGui::DragFloat("##", &position.x);
+
+        ImGui::SameLine();
+
+
+        ImGui::Separator();
+
+        ImGui::CollapsingHeader("Rotations", ImGuiTreeNodeFlags_DefaultOpen);
+
+        glm::vec3 rotation = transform->GetRotation();
+        ImGui::Text("X: %.3f", position.x);
+
+        ImGui::SameLine();
+        ImGui::Text("Y: %.3f", position.y);
+
+        ImGui::SameLine();
+        ImGui::Text("Z: %.3f", position.z);
+
+
+    }
+
     ImGui::End();
 }
 
