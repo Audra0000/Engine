@@ -956,14 +956,14 @@ void ModuleEditor::DrawAboutWindow()
 {
     ImGui::Begin("About", &showAbout);
 
-    ImGui::Text("Engine Name: Engine");
+    ImGui::Text("Engine Name: Wave Engine");
     ImGui::Text("Version: 0.1.0");
 
     ImGui::Separator();
 
     ImGui::Text("Team Members:");
     ImGui::BulletText("Haosheng Li");
-    ImGui::BulletText("");
+    ImGui::BulletText("Ana Alcaraz");
 
     ImGui::Separator();
 
