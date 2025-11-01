@@ -22,7 +22,11 @@ Camera::Camera()
 	firstOrbit(true),
 	lastPanX(400.0f),
 	lastPanY(300.0f),
-	firstPan(true)
+	firstPan(true),
+	mouseSensitivity(0.2f),
+	scrollSpeed(0.5f),
+	panSensitivity(0.003f),
+	movementSpeed(2.5f)
 {
 	UpdateProjectionMatrix();
 }
@@ -62,9 +66,8 @@ void Camera::SetAspectRatio(float newAspectRatio)
 
 void Camera::ProcessMouseMovement(float xoffset, float yoffset)
 {
-	const float sensitivity = 0.2f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
+	xoffset *= mouseSensitivity;
+	yoffset *= mouseSensitivity;
 
 	yaw += xoffset;
 	pitch += yoffset;
@@ -96,8 +99,7 @@ void Camera::HandleMouseInput(float xpos, float ypos)
 
 void Camera::HandleScrollInput(float yoffset)
 {
-	float zoomSpeed = 0.5f;
-	cameraPos += cameraFront * yoffset * zoomSpeed;
+	cameraPos += cameraFront * yoffset * scrollSpeed;
 
 	orbitDistance = glm::length(cameraPos - orbitTarget);
 }
@@ -120,9 +122,8 @@ void Camera::HandleOrbitInput(float xpos, float ypos)
 	lastOrbitX = xpos;
 	lastOrbitY = ypos;
 
-	const float sensitivity = 0.2f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
+ 	xoffset *= mouseSensitivity;
+	yoffset *= mouseSensitivity;
 
 	yaw += xoffset;
 	pitch += yoffset;
@@ -150,8 +151,6 @@ void Camera::UpdateOrbitPosition()
 
 void Camera::HandlePanInput(float xoffset, float yoffset)
 {
-	const float panSensitivity = 0.003f;
-
 	// Calculate the right and up vectors of the camera
 	glm::vec3 right = glm::normalize(glm::cross(cameraFront, cameraUp));
 	glm::vec3 up = glm::normalize(glm::cross(right, cameraFront));

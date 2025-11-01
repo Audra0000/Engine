@@ -210,6 +210,12 @@ void ModuleEditor::DrawConfigurationWindow()
 
     ImGui::Separator();
 
+	// Camera
+    if (ImGui::CollapsingHeader("Camera"))
+    {
+        DrawCameraSettings();
+    }
+
     // Hardware
     if (ImGui::CollapsingHeader("Hardware"))
     {
@@ -613,6 +619,107 @@ void ModuleEditor::DrawInspectorWindow()
         }
     }
     ImGui::End();
+}
+
+void ModuleEditor::DrawCameraSettings()
+{
+    ImGui::Text("Camera Controls");
+    ImGui::Separator();
+
+    Camera* camera = Application::GetInstance().renderer->GetCamera();
+    if (camera == nullptr)
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Error: Camera not available");
+        return;
+    }
+
+    // Update camera settings
+    cameraMouseSensitivity = camera->GetMouseSensitivity();
+    cameraScrollSpeed = camera->GetScrollSpeed();
+    cameraPanSensitivity = camera->GetPanSensitivity();
+    cameraMovementSpeed = camera->GetMovementSpeed();
+    cameraFOV = camera->GetFov();
+
+    ImGui::PushItemWidth(80);
+
+    // Movement Speed
+    if (ImGui::SliderFloat("Movement Speed", &cameraMovementSpeed, 0.1f, 10.0f, "%.2f"))
+    {
+        camera->SetMovementSpeed(cameraMovementSpeed);
+    }
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Controls how fast the camera moves (WASD keys)");
+
+    // Mouse Sensitivity
+    if (ImGui::SliderFloat("Mouse Sensitivity", &cameraMouseSensitivity, 0.01f, 1.0f, "%.3f"))
+    {
+        camera->SetMouseSensitivity(cameraMouseSensitivity);
+    }
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Controls camera rotation sensitivity when right-clicking");
+
+    // Scroll Speed
+    if (ImGui::SliderFloat("Scroll Speed", &cameraScrollSpeed, 0.1f, 2.0f, "%.2f"))
+    {
+        camera->SetScrollSpeed(cameraScrollSpeed);
+    }
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Controls zoom speed with mouse wheel");
+
+    // Pan Sensitivity
+    if (ImGui::SliderFloat("Pan Sensitivity", &cameraPanSensitivity, 0.001f, 0.01f, "%.4f"))
+    {
+        camera->SetPanSensitivity(cameraPanSensitivity);
+    }
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Controls camera panning sensitivity (middle mouse button)");
+
+    ImGui::Spacing();
+
+    // FOV
+    if (ImGui::SliderFloat("Field of View", &cameraFOV, 20.0f, 120.0f, "%.1f°"))
+    {
+        camera->SetFov(cameraFOV);
+    }
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Camera field of view in degrees");
+
+	ImGui::PopItemWidth();
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    // Reset button
+    if (ImGui::Button("Reset to Defaults"))
+    {
+        cameraMovementSpeed = 2.5f;
+        cameraMouseSensitivity = 0.2f;
+        cameraScrollSpeed = 0.5f;
+        cameraFOV = 45.0f;
+        cameraPanSensitivity = 0.003f;
+
+        camera->SetMovementSpeed(cameraMovementSpeed);
+        camera->SetMouseSensitivity(cameraMouseSensitivity);
+        camera->SetScrollSpeed(cameraScrollSpeed);
+        camera->SetFov(cameraFOV);
+        camera->SetPanSensitivity(cameraPanSensitivity);
+
+        LOG_CONSOLE("Camera settings reset to defaults");
+        LOG_DEBUG("Camera settings reset to defaults");
+    }
+
+    ImGui::Spacing();
+
+    // Camera Position Info
+    glm::vec3 camPos = camera->GetPosition();
+    ImGui::Text("Camera Position:");
+    ImGui::BulletText("X: %.2f  Y: %.2f  Z: %.2f", camPos.x, camPos.y, camPos.z);
+
+    ImGui::Spacing();
+    if (ImGui::CollapsingHeader("Camera Controls")) {
+        ImGui::Text("Camera Controls:");
+        ImGui::BulletText("Right Click + Drag: Rotate camera");
+        ImGui::BulletText("Middle Click + Drag: Pan camera");
+        ImGui::BulletText("Mouse Wheel: Zoom in/out");
+        ImGui::BulletText("Alt + Right Click: Orbit around target");
+        ImGui::BulletText("F: Focus on selected object");
+    }
+    ImGui::Separator();
 }
 
 void ModuleEditor::DrawConsoleWindow()

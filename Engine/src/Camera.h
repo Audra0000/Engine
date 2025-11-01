@@ -20,6 +20,7 @@ public:
 
 	void SetPosition(const glm::vec3& newPosition) { cameraPos = newPosition; }
 	void SetAspectRatio(float aspectRatio);  
+	void SetFov(float newFov) { fov = newFov; UpdateProjectionMatrix(); }
 
 	void HandleMouseInput(float xpos, float ypos);
 	void HandleScrollInput(float yoffset);
@@ -34,6 +35,19 @@ public:
 	void ResetOrbitInput() { firstOrbit = true; }
 	void ResetPanInput() { firstPan = true; }
 	glm::vec3 ScreenToWorldRay(int mouseX, int mouseY, int screenWidth, int screenHeight) const;
+
+	// Configuration parameters
+	float GetMouseSensitivity() const { return mouseSensitivity; }
+	void SetMouseSensitivity(float sensitivity) { mouseSensitivity = sensitivity; }
+
+	float GetScrollSpeed() const { return scrollSpeed; }
+	void SetScrollSpeed(float speed) { scrollSpeed = speed; }
+
+	float GetPanSensitivity() const { return panSensitivity; }
+	void SetPanSensitivity(float sensitivity) { panSensitivity = sensitivity; }
+
+	float GetMovementSpeed() const { return movementSpeed; }
+	void SetMovementSpeed(float speed) { movementSpeed = speed; }
 
 private:
 	glm::vec3 cameraPos;
@@ -62,6 +76,12 @@ private:
 	float lastPanX;
 	float lastPanY;
 	bool firstPan;
+
+	// Configuration variables
+	float mouseSensitivity;
+	float scrollSpeed;
+	float panSensitivity;
+	float movementSpeed;
 
 	void UpdateCameraVectors();
 	void ProcessMouseMovement(float xoffset, float yoffset);

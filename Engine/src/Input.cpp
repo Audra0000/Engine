@@ -264,7 +264,7 @@ bool Input::PreUpdate()
 	// Camera movement with WASD + right mouse button
 	ImGuiIO& io = ImGui::GetIO();
 	Camera* camera = Application::GetInstance().renderer->GetCamera();
-	const float cameraBaseSpeed = 2.5f;
+	const float cameraBaseSpeed = camera->GetMovementSpeed();
 	float speedMultiplier = keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT] ? 2.0f : 1.0f;
 	float cameraSpeed = cameraBaseSpeed * speedMultiplier * Application::GetInstance().time->GetDeltaTime();
 

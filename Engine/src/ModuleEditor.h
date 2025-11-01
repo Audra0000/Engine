@@ -32,6 +32,7 @@ private:
     void DrawFPSGraph();
     void DrawHardwareInfo();
     void DrawWindowSettings();
+    void DrawCameraSettings();
 
     // Hierarchy
     void DrawHierarchyWindow();
@@ -91,4 +92,10 @@ private:
     bool showVertexNormals = false;
     bool showFaceNormals = false;
 
+    // Camera Configuration
+    float cameraMovementSpeed = 2.5f;
+    float cameraMouseSensitivity = 0.2f;
+    float cameraScrollSpeed = 0.5f;
+    float cameraFOV = 45.0f;
+    float cameraPanSensitivity = 0.003f;
 };
