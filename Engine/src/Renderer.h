@@ -34,9 +34,28 @@ public:
     Shader* GetDefaultShader() const { return defaultShader.get(); }
     Camera* GetCamera() { return camera.get(); }
 
+
+	// Render settings
+    bool IsDepthTestEnabled() const { return depthTestEnabled; }
+    void SetDepthTest(bool enabled);
+
+    bool IsFaceCullingEnabled() const { return faceCullingEnabled; }
+    void SetFaceCulling(bool enabled);
+
+    bool IsWireframeMode() const { return wireframeMode; }
+    void SetWireframeMode(bool enabled);
+
+    void GetClearColor(float& r, float& g, float& b) const { r = clearColorR; g = clearColorG; b = clearColorB; }
+    void SetClearColor(float r, float g, float b);
+
+    int GetCullFaceMode() const { return cullFaceMode; } // 0=Back, 1=Front, 2=Both
+    void SetCullFaceMode(int mode);
+
+
 private:
 
     void DrawGameObjectRecursive(GameObject* gameObject);
+    void ApplyRenderSettings();
 
     std::unique_ptr<Shader> defaultShader;
     std::unique_ptr<Shader> lineShader;
@@ -44,4 +63,13 @@ private:
     std::unique_ptr<Texture> defaultTexture;
     Mesh sphere, cube, pyramid, cylinder, plane;
     unique_ptr<Camera> camera;
+
+    // Renderer Configuration
+    bool depthTestEnabled = true;
+    bool faceCullingEnabled = true;
+    bool wireframeMode = false;
+    float clearColorR = 0.2f;
+    float clearColorG = 0.25f;
+    float clearColorB = 0.3f;
+    int cullFaceMode = 0; // 0=GL_BACK, 1=GL_FRONT, 2=GL_FRONT_AND_BACK
 };

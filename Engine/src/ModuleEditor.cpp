@@ -216,6 +216,16 @@ void ModuleEditor::DrawConfigurationWindow()
         DrawCameraSettings();
     }
 
+	ImGui::Separator();
+
+	// Renderer
+    if (ImGui::CollapsingHeader("Renderer"))
+    {
+        DrawRendererSettings();
+	}
+
+	ImGui::Separator();
+
     // Hardware
     if (ImGui::CollapsingHeader("Hardware"))
     {
@@ -720,6 +730,125 @@ void ModuleEditor::DrawCameraSettings()
         ImGui::BulletText("F: Focus on selected object");
     }
     ImGui::Separator();
+}
+
+void ModuleEditor::DrawRendererSettings()
+{
+    ImGui::Text("OpenGL Renderer Settings");
+    ImGui::Separator();
+
+    Renderer* renderer = Application::GetInstance().renderer.get();
+    if (renderer == nullptr)
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Error: Renderer not available");
+        return;
+    }
+
+    // Face Culling
+    bool faceCulling = renderer->IsFaceCullingEnabled();
+    if (ImGui::Checkbox("Face Culling", &faceCulling))
+    {
+        renderer->SetFaceCulling(faceCulling);
+    }
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Enable/disable back-face culling");
+
+    // Cull Face Mode
+    if (faceCulling)
+    {
+        ImGui::Indent();
+        int cullMode = renderer->GetCullFaceMode();
+        const char* cullModes[] = { "Back", "Front", "Front and Back" };
+        if (ImGui::Combo("Cull Face Mode", &cullMode, cullModes, 3))
+        {
+            renderer->SetCullFaceMode(cullMode);
+        }
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Which faces to cull:\n- Back: Normal (hides back faces)\n- Front: Rare (hides front faces)\n- Both faces");
+        ImGui::Unindent();
+    }
+
+    ImGui::Spacing();
+
+    // Wireframe Mode
+    bool wireframe = renderer->IsWireframeMode();
+    if (ImGui::Checkbox("Wireframe Mode", &wireframe))
+    {
+        renderer->SetWireframeMode(wireframe);
+    }
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Render meshes as wireframes");
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    // Background Color
+    ImGui::Text("Background Color");
+
+    float currentR, currentG, currentB;
+    renderer->GetClearColor(currentR, currentG, currentB);
+
+    static float editColor[3] = { currentR, currentG, currentB };
+
+    // Color picker
+    ImGui::ColorEdit3("##ClearColor", editColor, ImGuiColorEditFlags_NoAlpha);
+
+	// Color changed?
+    bool colorChanged = (editColor[0] != currentR || editColor[1] != currentG || editColor[2] != currentB);
+
+    ImGui::SameLine();
+
+    // Apply button
+    if (!colorChanged)
+    {
+        ImGui::BeginDisabled();
+    }
+
+    if (ImGui::Button("Apply"))
+    {
+        renderer->SetClearColor(editColor[0], editColor[1], editColor[2]);
+        LOG_CONSOLE("Background color updated");
+        LOG_DEBUG("Background color set to (%.2f, %.2f, %.2f)", editColor[0], editColor[1], editColor[2]);
+    }
+
+    if (!colorChanged)
+    {
+        ImGui::EndDisabled();
+    }
+
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Apply the new background color");
+
+    ImGui::SameLine();
+
+    // Reset Color button
+    if (ImGui::Button("Reset Color"))
+    {
+        editColor[0] = 0.2f;
+        editColor[1] = 0.25f;
+        editColor[2] = 0.3f;
+        renderer->SetClearColor(editColor[0], editColor[1], editColor[2]);
+        LOG_CONSOLE("Background color reset to default");
+        LOG_DEBUG("Background color reset to default");
+    }
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Reset background color to default");
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    // Reset All button
+    if (ImGui::Button("Reset All Settings"))
+    {
+        renderer->SetFaceCulling(true);
+        renderer->SetWireframeMode(false);
+        renderer->SetCullFaceMode(0);
+        renderer->SetClearColor(0.2f, 0.25f, 0.3f);
+
+        editColor[0] = 0.2f;
+        editColor[1] = 0.25f;
+        editColor[2] = 0.3f;
+
+        LOG_CONSOLE("All renderer settings reset to defaults");
+        LOG_DEBUG("All renderer settings reset to defaults");
+    }
+
+    ImGui::Spacing();
 }
 
 void ModuleEditor::DrawConsoleWindow()

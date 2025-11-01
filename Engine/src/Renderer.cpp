@@ -174,7 +174,7 @@ bool Renderer::PreUpdate()
 
 bool Renderer::Update()
 {
-    glClearColor(0.2f, 0.25f, 0.3f, 1.0f);
+    glClearColor(clearColorR, clearColorG, clearColorB, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     defaultShader->Use();
@@ -483,4 +483,70 @@ void Renderer::DrawFaceNormals(const Mesh& mesh, const glm::mat4& modelMatrix)
     glDeleteVertexArrays(1, &lineVAO);
 
     defaultShader->Use();
+}
+
+void Renderer::SetDepthTest(bool enabled)
+{
+    depthTestEnabled = enabled;
+    if (enabled)
+        glEnable(GL_DEPTH_TEST);
+    else
+        glDisable(GL_DEPTH_TEST);
+
+    LOG_DEBUG("Depth test %s", enabled ? "enabled" : "disabled");
+}
+
+void Renderer::SetFaceCulling(bool enabled)
+{
+    faceCullingEnabled = enabled;
+    if (enabled)
+        glEnable(GL_CULL_FACE);
+    else
+        glDisable(GL_CULL_FACE);
+
+    LOG_DEBUG("Face culling %s", enabled ? "enabled" : "disabled");
+}
+
+void Renderer::SetWireframeMode(bool enabled)
+{
+    wireframeMode = enabled;
+    if (enabled)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    else
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    LOG_DEBUG("Wireframe mode %s", enabled ? "enabled" : "disabled");
+}
+
+void Renderer::SetClearColor(float r, float g, float b)
+{
+    clearColorR = r;
+    clearColorG = g;
+    clearColorB = b;
+    LOG_DEBUG("Clear color set to (%.2f, %.2f, %.2f)", r, g, b);
+}
+
+void Renderer::SetCullFaceMode(int mode)
+{
+    cullFaceMode = mode;
+
+    switch (mode)
+    {
+    case 0: glCullFace(GL_BACK); break;
+    case 1: glCullFace(GL_FRONT); break;
+    case 2: glCullFace(GL_FRONT_AND_BACK); break;
+    default: glCullFace(GL_BACK); break;
+    }
+
+    const char* modeStr[] = { "Back", "Front", "Front and Back" };
+    LOG_DEBUG("Cull face mode set to: %s", modeStr[mode]);
+}
+
+void Renderer::ApplyRenderSettings()
+{
+    // Apply all render settings
+    SetDepthTest(depthTestEnabled);
+    SetFaceCulling(faceCullingEnabled);
+    SetWireframeMode(wireframeMode);
+    SetCullFaceMode(cullFaceMode);
 }

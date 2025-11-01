@@ -33,6 +33,7 @@ private:
     void DrawHardwareInfo();
     void DrawWindowSettings();
     void DrawCameraSettings();
+    void DrawRendererSettings();
 
     // Hierarchy
     void DrawHierarchyWindow();
