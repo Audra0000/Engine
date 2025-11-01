@@ -21,6 +21,8 @@ public:
 
     GameObject* GetRoot() const { return root; }
 
+    void CleanupMarkedObjects(GameObject* parent);
+
 private:
 
     GameObject* root = nullptr;

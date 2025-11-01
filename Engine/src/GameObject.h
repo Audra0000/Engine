@@ -31,6 +31,9 @@ public:
     const std::vector<GameObject*>& GetChildren() const { return children; }
     const std::vector<Component*>& GetComponents() const { return components; }
 
+    void MarkForDeletion() { markedForDeletion = true; }
+    bool IsMarkedForDeletion() const { return markedForDeletion; }
+
 public:
     std::string name;
     bool active = true;
@@ -41,4 +44,7 @@ private:
 
     std::vector<Component*> components;
     std::vector<std::unique_ptr<Component>> componentOwners;
+
+    bool markedForDeletion = false;
+
 };

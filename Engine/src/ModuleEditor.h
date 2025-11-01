@@ -53,6 +53,8 @@ private:
     // Primitives
     void CreatePrimitiveGameObject(const std::string& name, Mesh mesh);
 
+    void HandleDeleteKey();
+
 private:
 
     // FPS

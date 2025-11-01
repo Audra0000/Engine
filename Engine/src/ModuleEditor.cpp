@@ -105,6 +105,8 @@ bool ModuleEditor::Update()
     if (showAbout)
         DrawAboutWindow();
 
+    HandleDeleteKey();
+
     return true;
 }
 
@@ -415,6 +417,7 @@ void ModuleEditor::DrawHierarchyWindow()
     {
         ImGui::TextDisabled("No scene loaded");
     }
+
 
     ImGui::End();
 }
@@ -1134,5 +1137,36 @@ void ModuleEditor::SelectGameObjectAndChildren(GameObject* gameObject)
     for (GameObject* child : children)
     {
         SelectGameObjectAndChildren(child);
+    }
+}
+
+void ModuleEditor::HandleDeleteKey()
+{
+    if (ImGui::IsKeyPressed(ImGuiKey_Delete) || ImGui::IsKeyPressed(ImGuiKey_Backspace))
+    {
+        if (ImGui::GetIO().WantTextInput) return;
+
+        std::vector<GameObject*> selectedObjects = Application::GetInstance().selectionManager->GetSelectedObjects();
+
+        if (!selectedObjects.empty())
+        {
+            int deletedCount = 0;
+
+            for (GameObject* obj : selectedObjects)
+            {
+                if (obj != nullptr && obj != Application::GetInstance().scene->GetRoot())
+                {
+                    obj->MarkForDeletion();
+                    deletedCount++;
+                }
+            }
+
+            Application::GetInstance().selectionManager->ClearSelection();
+
+            if (deletedCount > 0)
+            {
+                LOG_CONSOLE("GameObject deleted: %d", deletedCount);
+            }
+        }
     }
 }

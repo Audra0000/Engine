@@ -39,6 +39,7 @@ bool ModuleScene::Update()
     if (root)
     {
         root->Update();
+        CleanupMarkedObjects(root);
     }
     return true;
 }
@@ -70,4 +71,24 @@ GameObject* ModuleScene::CreateGameObject(const std::string& name)
     }
 
     return newObject;
+}
+
+void ModuleScene::CleanupMarkedObjects(GameObject* parent)
+{
+    if (!parent) return;
+
+    std::vector<GameObject*> children = parent->GetChildren();
+
+    for (GameObject* child : children)
+    {
+        if (child->IsMarkedForDeletion())
+        {
+            parent->RemoveChild(child);
+            delete child;
+        }
+        else
+        {
+            CleanupMarkedObjects(child);
+        }
+    }
 }
