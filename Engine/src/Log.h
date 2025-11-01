@@ -21,6 +21,12 @@ public:
     void Clear();
     const std::vector<std::string>& GetLogs() const { return logs; }
 
+    void Shutdown()
+    {
+        logs.clear();
+        logs.shrink_to_fit();
+    }
+
 private:
     ConsoleLog() = default;
     ~ConsoleLog() = default;

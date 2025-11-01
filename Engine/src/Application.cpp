@@ -161,7 +161,22 @@ bool Application::CleanUp()
             break;
         }
     }
+    moduleList.clear();
+
+    editor.reset();
+    scene.reset();
+    renderer.reset();
+    renderContext.reset();
+    grid.reset();
+    time.reset();
+    filesystem.reset();
+    input.reset();
+    window.reset();
+
     delete selectionManager;
+    selectionManager = nullptr;
+
+    ConsoleLog::GetInstance().Shutdown();
 
     LOG_DEBUG("=== Application Cleanup Complete ===");
     LOG_CONSOLE("Shutdown complete");
