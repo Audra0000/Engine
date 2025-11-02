@@ -22,25 +22,63 @@ bool FileSystem::Awake()
 
 bool FileSystem::Start()
 {
-
     LOG_DEBUG("Initializing FileSystem module");
     LOG_CONSOLE("FileSystem initialized");
 
-    // Get executable directory and move to Assets folder
+    // Get executable directory
     char buffer[MAX_PATH];
     GetModuleFileNameA(NULL, buffer, MAX_PATH);
     std::string execPath(buffer);
 
     size_t pos = execPath.find_last_of("\\/");
-    std::string execDir = execPath.substr(0, pos);
+    std::string currentDir = execPath.substr(0, pos);
 
-    // Go up two levels: build/ -> Engine/ -> root/
-    pos = execDir.find_last_of("\\/");
-    std::string parentDir = execDir.substr(0, pos);
-    pos = parentDir.find_last_of("\\/");
-    std::string rootDir = parentDir.substr(0, pos);
+    // Search for the Assets folder by uploading directories
+    std::string assetsPath;
+    std::string searchDir = currentDir;
+    bool assetsFound = false;
 
-    std::string housePath = rootDir + "\\Assets\\BakerHouse.fbx";
+    // Try up to 5 levels up
+    for (int i = 0; i < 5 && !assetsFound; i++)
+    {
+        std::string testPath = searchDir + "\\Assets";
+
+        // Verificar si existe el directorio Assets
+        DWORD attribs = GetFileAttributesA(testPath.c_str());
+        if (attribs != INVALID_FILE_ATTRIBUTES && (attribs & FILE_ATTRIBUTE_DIRECTORY))
+        {
+            assetsPath = testPath;
+            assetsFound = true;
+            LOG_DEBUG("Assets folder found at: %s", assetsPath.c_str());
+            break;
+        }
+
+        // Move up a level
+        pos = searchDir.find_last_of("\\/");
+        if (pos == std::string::npos)
+            break;
+        searchDir = searchDir.substr(0, pos);
+    }
+
+    if (!assetsFound)
+    {
+        LOG_DEBUG("ERROR: Assets folder not found");
+        LOG_CONSOLE("ERROR: Could not locate Assets folder");
+
+        // Create fallback geometry
+        GameObject* pyramidObject = new GameObject("Pyramid");
+        ComponentMesh* meshComp = static_cast<ComponentMesh*>(pyramidObject->CreateComponent(ComponentType::MESH));
+        Mesh pyramidMesh = Primitives::CreatePyramid();
+        meshComp->SetMesh(pyramidMesh);
+
+        GameObject* root = Application::GetInstance().scene->GetRoot();
+        root->AddChild(pyramidObject);
+
+        LOG_CONSOLE("Using fallback geometry - Assets folder not found");
+        return true;
+    }
+
+    std::string housePath = assetsPath + "\\BakerHouse.fbx";
 
     LOG_DEBUG("Attempting to load default model: %s", housePath.c_str());
     LOG_CONSOLE("Loading default scene...");
@@ -53,11 +91,10 @@ bool FileSystem::Start()
         root->AddChild(houseModel);
         LOG_DEBUG("FBX loaded from: %s", housePath.c_str());
         LOG_CONSOLE("Default model loaded: %s", housePath.c_str());
-
     }
     else
     {
-        LOG_CONSOLE("WARNING: Could't load default model");
+        LOG_CONSOLE("WARNING: Couldn't load default model");
         LOG_DEBUG("Failed to load default FBX, creating fallback geometry");
 
         GameObject* pyramidObject = new GameObject("Pyramid");
@@ -74,7 +111,6 @@ bool FileSystem::Start()
 
     return true;
 }
-
 bool FileSystem::Update()
 {
     if (Application::GetInstance().input->HasDroppedFile())
