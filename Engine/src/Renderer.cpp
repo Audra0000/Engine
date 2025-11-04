@@ -266,7 +266,8 @@ void Renderer::DrawGameObjectRecursive(GameObject* gameObject)
 
     if (selectionMgr->IsSelected(gameObject))
     {
-        defaultShader->SetVec3("tintColor", glm::vec3(1.5f, 1.5f, 0.3f)); // yellow
+        defaultShader->SetVec3("tintColor", glm::vec3(1.0f, 0.75f, 0.8f));
+        // yellow
     }
     else
     {

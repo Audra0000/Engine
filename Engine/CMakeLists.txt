@@ -39,39 +39,47 @@ set(UTILS_SRC
     src/Log.h 
     src/Time.cpp 
     src/Time.h 
-    src/FileSystem.cpp 
-    src/FileSystem.h 
-    src/Texture.h
-    src/Texture.cpp
     src/Grid.cpp
     src/Grid.h
     src/ModuleEditor.cpp
     src/ModuleEditor.h
+    src/SelectionManager.h
+    src/SelectionManager.cpp
 )
 
 set(GAMEOBJECTS_SRC 
+    src/GameObject.cpp 
+    src/GameObject.h 
+    src/ModuleScene.cpp 
+    src/ModuleScene.h 
+)
+
+set(COMPONENTS_SRC 
     src/Component.h  
     src/Component.cpp 
     src/ComponentMaterial.cpp 
     src/ComponentMaterial.h  
     src/ComponentMesh.h  
     src/ComponentMesh.cpp 
-    src/GameObject.cpp 
-    src/GameObject.h 
-    src/ModuleScene.cpp 
-    src/ModuleScene.h 
     src/Transform.cpp 
     src/Transform.h 
-    src/SelectionManager.h
-    src/SelectionManager.cpp
+)
+
+set(LOADERS_SRC 
+    src/Texture.h 
+    src/Texture.cpp  
+    src/FileSystem.h  
+    src/FileSystem.cpp 
 )
 
 source_group("Source\\Core" FILES ${CORE_SRC})
 source_group("Source\\Rendering" FILES ${RENDERING_SRC})
 source_group("Source\\Utils" FILES ${UTILS_SRC})
 source_group("Source\\Game Objects" FILES ${GAMEOBJECTS_SRC})
+source_group("Source\\Game Objects\\Components" FILES ${COMPONENTS_SRC})
+source_group("Source\\Loaders" FILES ${LOADERS_SRC})
 
-set(SRCS ${CORE_SRC} ${RENDERING_SRC} ${UTILS_SRC} ${GAMEOBJECTS_SRC})
+set(SRCS ${CORE_SRC} ${RENDERING_SRC} ${UTILS_SRC} ${GAMEOBJECTS_SRC} ${COMPONENTS_SRC} ${LOADERS_SRC})
 
 add_executable(Engine ${SRCS})
 
