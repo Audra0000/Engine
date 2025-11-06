@@ -221,6 +221,14 @@ bool Texture::LoadFromFile(const std::string& path, bool flipVertically)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
+    // Check if texture has alpha channel and adjust wrapping
+    if (nrChannels == 4)  // RGBA = tiene canal alpha
+    {
+        LOG_DEBUG("Texture has alpha channel - Setting wrapping to CLAMP_TO_EDGE");
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+
     glBindTexture(GL_TEXTURE_2D, 0);
 
     LOG_DEBUG("OpenGL texture created - ID: %d", textureID);
