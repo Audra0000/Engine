@@ -46,6 +46,14 @@ bool ModuleEditor::Start()
 
     ImGui::StyleColorsDark();
 
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.7f, 0.5f, 0.6f, 1.0f);           // Inactive titile (rosa pastel fosc)
+    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(1.0f, 0.7f, 0.9f, 1.0f);     // Active title (rosa pastel)
+    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.6f, 0.4f, 0.5f, 1.0f); 
+    style.Colors[ImGuiCol_Tab] = ImVec4(0.7f, 0.5f, 0.6f, 1.0f);               // Inactive tab
+    style.Colors[ImGuiCol_TabActive] = ImVec4(1.0f, 0.7f, 0.9f, 1.0f);         // Active tab
+    style.Colors[ImGuiCol_TabHovered] = ImVec4(1.0f, 0.8f, 0.95f, 1.0f);
+
     LOG_CONSOLE("Editor initialized");
 
     return true;

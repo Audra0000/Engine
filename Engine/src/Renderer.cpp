@@ -322,40 +322,14 @@ void Renderer::DrawScene()
 
     float outlineScale = 1.02f;
 
-    // Disable depth test so outlines render on top
+    // Disable depth test and depth writing so outlines render on top of everything
     glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
 
     for (GameObject* selectedObj : selectedObjects)
     {
         Transform* transform = static_cast<Transform*>(selectedObj->GetComponent(ComponentType::TRANSFORM));
         if (transform == nullptr) continue;
-
-        glm::mat4 modelMatrix = transform->GetGlobalMatrix();
-
-        // Decompose matrix into position, rotation, and scale
-        glm::vec3 position = glm::vec3(modelMatrix[3]);
-
-        glm::vec3 scale;
-        scale.x = glm::length(glm::vec3(modelMatrix[0]));
-        scale.y = glm::length(glm::vec3(modelMatrix[1]));
-        scale.z = glm::length(glm::vec3(modelMatrix[2]));
-
-        // Extract rotation by normalizing basis vectors
-        glm::mat4 rotationMatrix = modelMatrix;
-        rotationMatrix[0] /= scale.x;
-        rotationMatrix[1] /= scale.y;
-        rotationMatrix[2] /= scale.z;
-        rotationMatrix[3] = glm::vec4(0, 0, 0, 1);
-
-        // Apply outline scaling
-        glm::vec3 scaledScale = scale * outlineScale;
-
-        // Reconstruct matrix with scaled version
-        glm::mat4 outlineModelMatrix = glm::translate(glm::mat4(1.0f), position) *
-            rotationMatrix *
-            glm::scale(glm::mat4(1.0f), scaledScale);
-
-        glUniformMatrix4fv(outlineUniforms.model, 1, GL_FALSE, glm::value_ptr(outlineModelMatrix));
 
         const std::vector<Component*>& meshComponents =
             selectedObj->GetComponentsOfType(ComponentType::MESH);
@@ -367,6 +341,32 @@ void Renderer::DrawScene()
             if (meshComp->IsActive() && meshComp->HasMesh())
             {
                 const Mesh& mesh = meshComp->GetMesh();
+
+                // Calculate mesh center in local space
+                glm::vec3 meshCenter(0.0f);
+                if (!mesh.vertices.empty())
+                {
+                    for (const auto& vertex : mesh.vertices)
+                    {
+                        meshCenter += vertex.position;
+                    }
+                    meshCenter /= static_cast<float>(mesh.vertices.size());
+                }
+
+                // Get global transformation
+                glm::mat4 globalMatrix = transform->GetGlobalMatrix();
+
+                // Transform mesh center to world space
+                glm::vec4 worldCenter = globalMatrix * glm::vec4(meshCenter, 1.0f);
+
+                // Scale from mesh center in world space
+                glm::mat4 toCenter = glm::translate(glm::mat4(1.0f), -glm::vec3(worldCenter));
+                glm::mat4 fromCenter = glm::translate(glm::mat4(1.0f), glm::vec3(worldCenter));
+                glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(outlineScale));
+
+                glm::mat4 outlineModelMatrix = fromCenter * scale * toCenter * globalMatrix;
+
+                glUniformMatrix4fv(outlineUniforms.model, 1, GL_FALSE, glm::value_ptr(outlineModelMatrix));
                 DrawMesh(mesh);
             }
         }
@@ -374,6 +374,7 @@ void Renderer::DrawScene()
 
     // Restore state
     glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
     defaultShader->Use();
 
     // Third pass: render transparent objects back-to-front
