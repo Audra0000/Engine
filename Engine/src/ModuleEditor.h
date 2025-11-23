@@ -11,6 +11,17 @@
 
 class GameObject;
 
+enum class EditorWindow
+{
+    NONE = 0,
+    SCENE,
+    CONFIGURATION,
+    HIERARCHY,
+    INSPECTOR,
+    CONSOLE,
+    ABOUT
+};
+
 class ModuleEditor : public Module
 {
 public:
@@ -33,6 +44,10 @@ public:
     bool ShouldShowOctree() const { return showOctree; }
     bool ShouldShowRaycast() const { return showRaycast; }
 
+	// Window State
+    EditorWindow GetCurrentWindow() const { return currentWindow; }
+    bool IsSceneWindowActive() const { return currentWindow == EditorWindow::SCENE; }
+    bool IsMouseOverScene() const;
 private:
 
     bool ShowMenuBar();
@@ -68,6 +83,9 @@ private:
     // Gizmo
     void DrawGizmo();
 	void HandleGizmoInput();
+
+    void UpdateCurrentWindow();
+
 private:
 
     // FPS
@@ -84,6 +102,11 @@ private:
 
     int lastWindowWidth = 0;
     int lastWindowHeight = 0;
+        
+	// Window State
+    EditorWindow currentWindow = EditorWindow::NONE;
+    bool isMouseOverSceneViewport = false;
+    EditorWindow lastHoveredWindow = EditorWindow::NONE;
 
 	// Configuration
     bool fullscreen = false;

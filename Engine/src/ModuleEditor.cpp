@@ -136,29 +136,76 @@ bool ModuleEditor::Update()
     ImGui::PopStyleVar();
 
     // Configuration Window
-    if (showConfiguration) {
+    if (showConfiguration)
+    {
+        ImGui::Begin("Configuration");
+
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_ChildWindows))
+        {
+            lastHoveredWindow = EditorWindow::CONFIGURATION;
+        }
+
         DrawConfigurationWindow();
+        ImGui::End();
     }
 
     // Console Window
     if (showConsole) {
+        ImGui::Begin("Console");
+
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_ChildWindows))
+        {
+            lastHoveredWindow = EditorWindow::CONSOLE;
+        }
+
         DrawConsoleWindow();
+        ImGui::End();
     }
 
     // Hierarchy Window
-    if (showHierarchy) {
+    if (showHierarchy)
+    {
+        ImGui::Begin("Hierarchy");
+
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_ChildWindows))
+        {
+            lastHoveredWindow = EditorWindow::HIERARCHY;
+        }
+
         DrawHierarchyWindow();
+        ImGui::End();
     }
 
     // Inspector Window
-    if (showInspector) {
+    if (showInspector)
+    {
+        ImGui::Begin("Inspector");
+
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_ChildWindows))
+        {
+            lastHoveredWindow = EditorWindow::INSPECTOR;
+        }
+
         DrawInspectorWindow();
+        ImGui::End();
     }
 
     if (showAbout)
+    {
+        ImGui::Begin("About");
+
+        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_ChildWindows))
+        {
+            lastHoveredWindow = EditorWindow::ABOUT;
+        }
+
         DrawAboutWindow();
+        ImGui::End();
+    }
 
     HandleDeleteKey();
+
+    UpdateCurrentWindow();
 
     return true;
 }
@@ -1670,4 +1717,31 @@ void ModuleEditor::HandleDeleteKey()
             }
         }
     }
+}
+
+void ModuleEditor::UpdateCurrentWindow()
+{
+    ImVec2 mousePos = ImGui::GetMousePos();
+
+    isMouseOverSceneViewport = false;
+
+    currentWindow = lastHoveredWindow;
+    lastHoveredWindow = EditorWindow::NONE;
+
+    if (currentWindow == EditorWindow::NONE)
+    {
+        if (mousePos.x >= sceneViewportPos.x &&
+            mousePos.x <= sceneViewportPos.x + sceneViewportSize.x &&
+            mousePos.y >= sceneViewportPos.y &&
+            mousePos.y <= sceneViewportPos.y + sceneViewportSize.y)
+        {
+            currentWindow = EditorWindow::SCENE;
+            isMouseOverSceneViewport = true;
+        }
+    }
+}
+
+bool ModuleEditor::IsMouseOverScene() const
+{
+    return isMouseOverSceneViewport;
 }
